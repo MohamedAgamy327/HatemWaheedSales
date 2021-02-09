@@ -17,6 +17,7 @@ namespace Sales.ViewModels.StoreViewModels
     {
         MetroWindow _currentWindow;
         private readonly StockAddDialog _stockAddDialog;
+        List<Stock> stocks;
 
         StockServices _stockServ;
 
@@ -24,15 +25,15 @@ namespace Sales.ViewModels.StoreViewModels
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _stockServ.GetStocksNumer(Key);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_stockServ.GetStocksNumer(_key) / 17));
+            TotalRecords = stocks.Where(w => (w.Name).Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            Stocks = new ObservableCollection<Stock>(_stockServ.SearchStocks(_key, _currentPage));
+            GetCurrentPage();
         }
 
         public StockViewModel()
@@ -44,10 +45,11 @@ namespace Sales.ViewModels.StoreViewModels
             _isFocused = true;
             _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
             _stocksSuggestions = _stockServ.GetStocksSuggetions();
+            stocks = _stockServ.GetStocks();
             Load();
         }
 
-        private bool _isFocused ;
+        private bool _isFocused;
         public bool IsFocused
         {
             get { return _isFocused; }
@@ -89,7 +91,7 @@ namespace Sales.ViewModels.StoreViewModels
             set { SetProperty(ref _totalRecords, value); }
         }
 
-        private string _key ;
+        private string _key;
         public string Key
         {
             get { return _key; }
@@ -113,7 +115,7 @@ namespace Sales.ViewModels.StoreViewModels
             set { SetProperty(ref _newStock, value); }
         }
 
-        private List<string> _stocksSuggestions ;
+        private List<string> _stocksSuggestions;
         public List<string> StocksSuggestions
         {
             get { return _stocksSuggestions; }
@@ -158,7 +160,7 @@ namespace Sales.ViewModels.StoreViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            Stocks = new ObservableCollection<Stock>(_stockServ.SearchStocks(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -176,7 +178,7 @@ namespace Sales.ViewModels.StoreViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            Stocks = new ObservableCollection<Stock>(_stockServ.SearchStocks(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _delete;
@@ -200,7 +202,8 @@ namespace Sales.ViewModels.StoreViewModels
             if (result == MessageDialogResult.Affirmative)
             {
                 _stockServ.DeleteStock(_selectedStock);
-                Load();
+                stocks.Remove(_selectedStock);
+                GetCurrentPage();
             }
         }
 
@@ -245,7 +248,8 @@ namespace Sales.ViewModels.StoreViewModels
             }
             else
             {
-                _stockServ.AddStock(_newStock);
+               _newStock= _stockServ.AddStock(_newStock);
+                stocks.Add(_newStock);
                 _stocksSuggestions.Add(_newStock.Name);
                 NewStock = new Stock();
                 await _currentWindow.ShowMessageAsync("نجاح الإضافة", "تم الإضافة بنجاح", MessageDialogStyle.Affirmative, new MetroDialogSettings()
@@ -283,5 +287,11 @@ namespace Sales.ViewModels.StoreViewModels
             }
 
         }
+
+        private void GetCurrentPage()
+        {
+            Stocks = new ObservableCollection<Stock>(stocks.Where(w => (w.Name).Contains(_key)).OrderBy(o => o.Name).Skip((_currentPage - 1) * 17).Take(17));
+        }
+
     }
 }

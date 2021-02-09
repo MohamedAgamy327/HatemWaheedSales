@@ -7,26 +7,28 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using Sales.Models;
+using System.Collections.Generic;
 
 namespace Sales.ViewModels.StoreViewModels
 {
     public class CategoryRequiredViewModel : ValidatableBindableBase
     {
         CategoryServices _categoryServ;
+        List<CategoryVM> categories;
 
         private void Load()
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _categoryServ.GetCategoriesNumer(Key);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_categoryServ.GetCategoriesNumer(_key) / 17));
+            TotalRecords = categories.Where(w => (w.Company + w.Category + w.Stock).Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            Categories = new ObservableCollection<CategoryVM>(_categoryServ.GetRequiredCategories(_key, _currentPage));
+            GetCurrentPage();
         }
         public CategoryRequiredViewModel()
         {
@@ -34,7 +36,7 @@ namespace Sales.ViewModels.StoreViewModels
 
             _key = "";
             _isFocused = true;
-            _categoryServ.GetRequiredCategories();
+            categories = _categoryServ.GetRequiredCategories();
             Load();
         }
 
@@ -80,7 +82,7 @@ namespace Sales.ViewModels.StoreViewModels
             set { SetProperty(ref _totalRecords, value); }
         }
 
-        private string _key ;
+        private string _key;
         public string Key
         {
             get { return _key; }
@@ -126,7 +128,7 @@ namespace Sales.ViewModels.StoreViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            Categories = new ObservableCollection<CategoryVM>(_categoryServ.GetRequiredCategories(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -144,7 +146,7 @@ namespace Sales.ViewModels.StoreViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            Categories = new ObservableCollection<CategoryVM>(_categoryServ.GetRequiredCategories(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _print;
@@ -162,7 +164,7 @@ namespace Sales.ViewModels.StoreViewModels
             DS ds = new DS();
             ds.RequiredCategory.Rows.Clear();
             int i = 0;
-            foreach (var item in _categoryServ.GetAllRequiredCategories().Where(w => w.RequiredQty > 0))
+            foreach (var item in categories)
             {
                 ds.RequiredCategory.Rows.Add();
                 ds.RequiredCategory[i]["Serial"] = i + 1;
@@ -179,6 +181,12 @@ namespace Sales.ViewModels.StoreViewModels
 
             //requiredCategoryRPT.PrintOptions.PrinterName = _selectedPrinter;
             //requiredCategoryRPT.PrintToPrinter(1, true, 0, 0);
+        }
+
+
+        private void GetCurrentPage()
+        {
+            Categories = new ObservableCollection<CategoryVM>(categories.Where(w =>  (w.Company + w.Category + w.Stock).Contains(_key)).Skip((_currentPage - 1) * 17).Take(17));
         }
     }
 }

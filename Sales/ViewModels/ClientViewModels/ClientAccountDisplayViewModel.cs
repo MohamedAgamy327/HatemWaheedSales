@@ -394,7 +394,7 @@ namespace Sales.ViewModels.ClientViewModels
                 _newClientAccount.Debit = 0;
             }
 
-            var newAccount = _clientAccountServ.AddAccount(_newClientAccount);
+            _clientAccountServ.AddAccount(_newClientAccount);
             clientAccounts.Add(_clientAccountServ.GetAccount());
             SelectedStatement = null;
             NewClientAccount = new ClientAccount

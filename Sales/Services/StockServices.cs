@@ -7,30 +7,24 @@ namespace Sales.Services
 {
     public class StockServices
     {
-        public void AddStock(Stock stock)
+        public Stock AddStock(Stock stock)
         {
             using (SalesDB db = new SalesDB())
             {
                 db.Stocks.Add(stock);
                 db.SaveChanges();
+                return stock;
             }
         }
 
-        public void DeleteStock(Stock stock)
+        public Stock DeleteStock(Stock stock)
         {
             using (SalesDB db = new SalesDB())
             {
                 db.Stocks.Attach(stock);
                 db.Stocks.Remove(stock);
                 db.SaveChanges();
-            }
-        }
-
-        public int GetStocksNumer(string key)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Stocks.Where(w => w.Name.Contains(key)).Count();
+                return stock;
             }
         }
 
@@ -60,15 +54,7 @@ namespace Sales.Services
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Stocks.OrderBy(o => o.Name).ToList();
-            }
-        }
-
-        public List<Stock> SearchStocks(string search, int page)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Stocks.Where(w => (w.Name).Contains(search)).OrderBy(o => o.Name).Skip((page - 1) * 17).Take(17).Include(c => c.Categories).ToList();
+                return db.Stocks.OrderBy(o => o.Name).Include(c => c.Categories).ToList();
             }
         }
     }

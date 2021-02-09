@@ -9,7 +9,7 @@ namespace Sales.Services
     public class CategoryServices
     {
         CategoryVM categoryInfo = new CategoryVM();
-        List<CategoryVM> requiredCategories = new List<CategoryVM>();
+        //List<CategoryVM> requiredCategories = new List<CategoryVM>();
 
         public void AddCategory(Category category)
         {
@@ -249,7 +249,7 @@ namespace Sales.Services
         {
             using (SalesDB db = new SalesDB())
             {
-                requiredCategories = db.Categories.Where(w => w.Isarchived == false).Include(i => i.Company).Include(s => s.Stock).Select(s => new CategoryVM
+                return db.Categories.Where(w => w.Isarchived == false).Include(i => i.Company).Include(s => s.Stock).Select(s => new CategoryVM
                 {
                     Category = s.Name,
                     Company = s.Company.Name,
@@ -260,18 +260,18 @@ namespace Sales.Services
                     RequestLimit = s.RequestLimit,
                     ID = s.ID
                 }).ToList();
-                return requiredCategories;
+
             }
         }
 
-        public List<CategoryVM> GetRequiredCategories(string key, int page)
-        {
-            return requiredCategories.OrderBy(o => o.Company).ThenBy(t => t.Category).Where(w => w.Isarchived == false && (w.Company + w.Category + w.Stock).Contains(key)).Skip((page - 1) * 17).Take(17).ToList();
-        }
+        //public List<CategoryVM> GetRequiredCategories(string key, int page)
+        //{
+        //    return requiredCategories.OrderBy(o => o.Company).ThenBy(t => t.Category).Where(w => w.Isarchived == false && (w.Company + w.Category + w.Stock).Contains(key)).Skip((page - 1) * 17).Take(17).ToList();
+        //}
 
-        public List<CategoryVM> GetAllRequiredCategories()
-        {
-            return requiredCategories.ToList();
-        }
+        //public List<CategoryVM> GetAllRequiredCategories()
+        //{
+        //    return requiredCategories.ToList();
+        //}
     }
 }
