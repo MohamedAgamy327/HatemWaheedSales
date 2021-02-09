@@ -164,7 +164,7 @@ namespace Sales.ViewModels.StoreViewModels
             DS ds = new DS();
             ds.RequiredCategory.Rows.Clear();
             int i = 0;
-            foreach (var item in categories)
+            foreach (var item in categories.Where(w => w.RequiredQty > 0))
             {
                 ds.RequiredCategory.Rows.Add();
                 ds.RequiredCategory[i]["Serial"] = i + 1;
@@ -186,7 +186,7 @@ namespace Sales.ViewModels.StoreViewModels
 
         private void GetCurrentPage()
         {
-            Categories = new ObservableCollection<CategoryVM>(categories.Where(w =>  (w.Company + w.Category + w.Stock).Contains(_key)).Skip((_currentPage - 1) * 17).Take(17));
+            Categories = new ObservableCollection<CategoryVM>(categories.Where(w => (w.Company + w.Category + w.Stock).Contains(_key)).Skip((_currentPage - 1) * 17).Take(17));
         }
     }
 }

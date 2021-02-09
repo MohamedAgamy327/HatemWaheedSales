@@ -1,4 +1,4 @@
-﻿
+﻿D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\GeneratedInternalTypeHelper.g.cs
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\App.xaml;;
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\SplashScreen\SplashScreenWindow.xaml;;
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\ClientViews\ClientAccountAddDialog.xaml;;
@@ -8,6 +8,7 @@ FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\ClientViews\ClientInfoDialog
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\ClientViews\ClientUpdateDialog.xaml;;
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\ClientViews\ClientWindow.xaml;;
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\MainViews\LoginDialog.xaml;;
+FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\MainViews\SettingsDialog.xaml;;
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\MainViews\UserDialog.xaml;;
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\SafeViews\SafeAddDialog.xaml;;
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\SafeViews\SafeDisplayUserControl.xaml;;
@@ -38,5 +39,4 @@ FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\SupplyViews\SupplyDisplayUse
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\SupplyViews\SupplyRecallDialog.xaml;;
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\SupplyViews\SupplyUpdateWindow.xaml;;
 FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\SupplyViews\SupplyWindow.xaml;;
-FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\MainViews\SettingsDialog.xaml;;
 

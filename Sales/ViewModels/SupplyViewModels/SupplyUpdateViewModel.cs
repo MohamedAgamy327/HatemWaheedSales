@@ -51,7 +51,7 @@ namespace Sales.ViewModels.SupplyViewModels
             _supplyCategoryServ = new SupplyCategoryServices();
             _categoriesDialog = new CategoriesShowDialog();
 
-            _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();           
+            _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
             _supplyCategories = new ObservableCollection<SupplyCategoryVM>(_supplyCategoryServ.GetSupplyCategoriesVM(ID));
             _selectedSupply = _supplyServ.GetSupply(ID);
         }
@@ -180,7 +180,7 @@ namespace Sales.ViewModels.SupplyViewModels
             {
                 MessageBox.Show(ex.ToString());
             }
-          
+
         }
 
         private RelayCommand _addToBill;
@@ -218,13 +218,16 @@ namespace Sales.ViewModels.SupplyViewModels
             {
                 MessageBox.Show(ex.ToString());
             }
-       
+
         }
         private bool CanExecuteAddToBill()
         {
             try
             {
-                return !NewSupplyCategory.HasErrors;
+                if (NewSupplyCategory != null)
+                    return !NewSupplyCategory.HasErrors;
+                else
+                    return false;
             }
             catch
             {
@@ -313,6 +316,8 @@ namespace Sales.ViewModels.SupplyViewModels
                     Category cat = _categoryServ.GetCategory(item.CategoryID);
                     if (cat.Qty - item.Qty != 0)
                         cat.Cost = ((cat.Cost * cat.Qty) - item.CostTotal) / (cat.Qty - item.Qty);
+                    if (cat.Cost < 0)
+                        cat.Cost = 0;
                     cat.Qty = cat.Qty - item.Qty;
                     _categoryServ.UpdateCategory(cat);
                 }
