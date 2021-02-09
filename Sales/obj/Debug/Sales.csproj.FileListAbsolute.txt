@@ -844,3 +844,5 @@ D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\Sales.csproj.CoreCompileI
 D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\Sales.csproj.CopyComplete
 D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\Sales.exe
 D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\Sales.pdb
+D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\Views\MainViews\SettingsDialog.g.cs
+D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\Views\MainViews\SettingsDialog.baml

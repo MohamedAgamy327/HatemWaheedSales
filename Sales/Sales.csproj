@@ -258,6 +258,9 @@
     <Compile Include="Views\MainViews\RestoreBackupDialog.xaml.cs">
       <DependentUpon>RestoreBackupDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\MainViews\SettingsDialog.xaml.cs">
+      <DependentUpon>SettingsDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\MainViews\UserDialog.xaml.cs">
       <DependentUpon>UserDialog.xaml</DependentUpon>
     </Compile>
@@ -447,6 +450,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\MainViews\RestoreBackupDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MainViews\SettingsDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

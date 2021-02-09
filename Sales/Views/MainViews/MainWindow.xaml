@@ -44,6 +44,9 @@
             <Button Command="{Binding NavigateToView}" CommandParameter="User" >
                 <iconPacks:PackIconMaterial Kind="AccountMultiple"  />
             </Button>
+            <Button Command="{Binding NavigateToView}" CommandParameter="Settings" >
+                <iconPacks:PackIconMaterial Kind="Settings"  />
+            </Button>
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>
 

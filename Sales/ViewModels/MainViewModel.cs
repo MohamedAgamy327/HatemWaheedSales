@@ -22,17 +22,21 @@ using Sales.Views.SaleViews;
 using System.Data.Entity.Infrastructure;
 using Sales.Migrations;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Sales.ViewModels
 {
     public class MainViewModel : ValidatableBindableBase
     {
+        public static int Year { get; set; }
+
         UserServices userServ = new UserServices();
 
         MetroWindow _currentWindow;
         private readonly BackupDialog _backupDialog;
         private readonly RestoreBackupDialog _restoreBackupDialog;
         private readonly UserDialog _userDialog;
+        private readonly SettingsDialog _settingsDialog;
         private readonly Views.MainViews.LoginDialog _loginDialog;
 
         public MainViewModel()
@@ -43,7 +47,12 @@ namespace Sales.ViewModels
             _backupDialog = new BackupDialog();
             _restoreBackupDialog = new RestoreBackupDialog();
             _userDialog = new UserDialog();
+            _settingsDialog = new SettingsDialog();
             _loginDialog = new Views.MainViews.LoginDialog();
+            Year = DateTime.Now.Year;
+            GetYears();
+            SelectedYear = Year.ToString();
+
         }
 
         private bool _isFocused;
@@ -63,7 +72,21 @@ namespace Sales.ViewModels
 
         // Main
 
-        private User _currentedUser ;
+        private string _selectedYear;
+        public string SelectedYear
+        {
+            get { return _selectedYear; }
+            set { SetProperty(ref _selectedYear, value); }
+        }
+
+        private List<string> _years;
+        public List<string> Years
+        {
+            get { return _years; }
+            set { SetProperty(ref _years, value); }
+        }
+
+        private User _currentedUser;
         public User CurrentUser
         {
             get { return _currentedUser; }
@@ -127,6 +150,10 @@ namespace Sales.ViewModels
                     _restoreBackupDialog.DataContext = this;
                     Url = "";
                     await _currentWindow.ShowMetroDialogAsync(_restoreBackupDialog);
+                    break;
+                case "Settings":                   
+                    _settingsDialog.DataContext = this;
+                    await _currentWindow.ShowMetroDialogAsync(_settingsDialog);
                     break;
                 default:
                     break;
@@ -339,6 +366,22 @@ namespace Sales.ViewModels
             return !HasErrors;
         }
 
+
+        private RelayCommand _updateYear;
+        public RelayCommand UpdateYear
+        {
+            get
+            {
+                return _updateYear ?? (_updateYear = new RelayCommand(
+                    ExecuteUpdateYearAsync));
+            }
+        }
+        private async void ExecuteUpdateYearAsync()
+        {
+            Year = Convert.ToInt32(SelectedYear);
+            await _currentWindow.HideMetroDialogAsync(_settingsDialog);
+        }
+
         // User
 
         private RelayCommand _updateUser;
@@ -386,6 +429,9 @@ namespace Sales.ViewModels
                 case "Login":
                     await _currentWindow.HideMetroDialogAsync(_loginDialog);
                     _currentWindow.Close();
+                    break;
+                case "Settings":
+                    await _currentWindow.HideMetroDialogAsync(_settingsDialog);
                     break;
                 default:
                     break;
@@ -443,5 +489,17 @@ namespace Sales.ViewModels
                 }
             }
         }
+   
+        private void GetYears()
+        {
+            Years = new List<string>();
+            int startYear = 2017;
+            int currentYear = DateTime.Now.Year;
+            for (int i = 0; i < currentYear - startYear; i++)
+            {
+                Years.Add((currentYear - i).ToString());
+            }
+        }
+    
     }
 }

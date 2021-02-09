@@ -1,4 +1,5 @@
 ﻿using Sales.Models;
+using Sales.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -44,7 +45,7 @@ namespace Sales.Services
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.ClientsAccounts.Include(i => i.Client).OrderByDescending(o => o.RegistrationDate).ToList();
+                return db.ClientsAccounts.Where(c => c.RegistrationDate.Year == MainViewModel.Year).Include(i => i.Client).OrderByDescending(o => o.RegistrationDate).ToList();
             }
         }
 
@@ -52,7 +53,7 @@ namespace Sales.Services
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.ClientsAccounts.Include(i => i.Client).OrderByDescending(o=>o.ID).FirstOrDefault();
+                return db.ClientsAccounts.Include(i => i.Client).OrderByDescending(o => o.ID).FirstOrDefault();
             }
         }
 
@@ -133,7 +134,7 @@ namespace Sales.Services
                 return db.ClientsAccounts.Where(w => w.ClientID == clientID && w.Date >= dtFrom && w.Date <= dtTo).OrderByDescending(o => o.RegistrationDate).ToList();
             }
         }
-      
+
         public List<ClientAccount> SearchClientsAccounts(string search, int page, DateTime dtFrom, DateTime dtTo)
         {
             using (SalesDB db = new SalesDB())

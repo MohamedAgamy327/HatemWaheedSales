@@ -1,41 +1,4 @@
-﻿D:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\obj\Debug\GeneratedInternalTypeHelper.g.i.cs
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\App.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\SplashScreen\SplashScreenWindow.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\ClientViews\ClientAccountAddDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\ClientViews\ClientAddDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\ClientViews\ClientDisplayUserControl.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\ClientViews\ClientInfoDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\ClientViews\ClientUpdateDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\ClientViews\ClientWindow.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\MainViews\LoginDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\MainViews\UserDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SafeViews\SafeAddDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SafeViews\SafeDisplayUserControl.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SafeViews\SafeReportUserControl.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SafeViews\SafeWindow.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SaleViews\CategoriesShowDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SaleViews\SaleAddWindow.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SaleViews\SaleDisplayUserControl.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SaleViews\SaleRecallDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SaleViews\SalespersonAddDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SaleViews\SalespersonDisplayUserControl.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SaleViews\SalespersonUpdateDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SaleViews\SaleWindow.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SpendingViews\SpendingAddDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SpendingViews\SpendingWindow.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\StoreViews\CategoryAddDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\StoreViews\CategoryRequiredUserControl.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\StoreViews\CategoryUpdateDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\StoreViews\CategoryUserControl.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\StoreViews\CompanyAddDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\StoreViews\CompanyUserControl.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\StoreViews\StockAddDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\StoreViews\StockUserControl.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\StoreViews\StoreWindow.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SupplyViews\CategoriesShowDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SupplyViews\SupplyAddWindow.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SupplyViews\SupplyDisplayUserControl.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SupplyViews\SupplyRecallDialog.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SupplyViews\SupplyUpdateWindow.xaml;;
-FD:\Work\Project\Freelance\Hatem Waheed\Sales\Sales\Views\SupplyViews\SupplyWindow.xaml;;
+﻿
+
+FD:\Projects\Working\Hatem Waheed\Sales\Sales\Views\MainViews\SettingsDialog.xaml;;
 
