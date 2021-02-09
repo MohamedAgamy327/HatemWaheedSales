@@ -24,7 +24,6 @@ namespace Sales.ViewModels.SupplyViewModels
 
         SafeServices _safeServ;
         SupplyServices _supplyServ;
-        ClientServices _clientServ;
         CategoryServices _categoryServ;
         ClientAccountServices _clientAccountServ;
         SupplyCategoryServices _supplyCategoryServ;
@@ -47,7 +46,6 @@ namespace Sales.ViewModels.SupplyViewModels
         {
             _safeServ = new SafeServices();
             _supplyServ = new SupplyServices();
-            _clientServ = new ClientServices();
             _categoryServ = new CategoryServices();
             _clientAccountServ = new ClientAccountServices();
             _supplyCategoryServ = new SupplyCategoryServices();
@@ -508,7 +506,6 @@ namespace Sales.ViewModels.SupplyViewModels
             }
 
         }
-
 
     }
 }

@@ -200,7 +200,6 @@ namespace Sales.ViewModels.SupplyViewModels
                 {
                     _newSupply.OldDebt = null;
                     OldCosts = new ObservableCollection<SupplyCategory>();
-
                 }
             }
             catch

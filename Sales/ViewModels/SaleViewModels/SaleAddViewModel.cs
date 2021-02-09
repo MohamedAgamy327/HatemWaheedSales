@@ -215,11 +215,19 @@ namespace Sales.ViewModels.SaleViewModels
         {
             try
             {
-                NewSale.OldDebt = _clientAccountServ.GetClientAccount(_selectedClient.ID) + _selectedClient.AccountStart;
-                if (NewSaleCategory != null)
-                    OldPrices = new ObservableCollection<SaleCategory>(_saleCategoryServ.GetOldPrices(_newSaleCategory.CategoryID, _selectedClient.ID));
+                if (_selectedClient != null)
+                {
+                    NewSale.OldDebt = _clientAccountServ.GetClientAccount(_selectedClient.ID) + _selectedClient.AccountStart;
+                    if (NewSaleCategory != null)
+                        OldPrices = new ObservableCollection<SaleCategory>(_saleCategoryServ.GetOldPrices(_newSaleCategory.CategoryID, _selectedClient.ID));
+                    else
+                        OldPrices = new ObservableCollection<SaleCategory>();
+                }
                 else
+                {
+                    _newSale.OldDebt = null;
                     OldPrices = new ObservableCollection<SaleCategory>();
+                }
             }
             catch
             {

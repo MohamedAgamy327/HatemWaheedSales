@@ -6,6 +6,7 @@ using Sales.Models;
 using Sales.Services;
 using Sales.Views.ClientViews;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -21,22 +22,21 @@ namespace Sales.ViewModels.ClientViewModels
         SafeServices _safeServ;
         ClientServices _clientServ;
         ClientAccountServices _clientAccountServ;
-
+        List<ClientAccount> clientAccounts;
         private void Load()
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _clientAccountServ.GetClientsAccountsNumer(Key);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_clientAccountServ.GetClientsAccountsNumer(_key) / 17));
+            TotalRecords = clientAccounts.Where(w => (w.Statement + w.Client.Name).Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            ClientsAccounts = new ObservableCollection<ClientAccount>(_clientAccountServ.SearchClientsAccounts(_key, _currentPage));
+            GetCurrentPage();
         }
-
         public ClientAccountDisplayViewModel()
         {
             _safeServ = new SafeServices();
@@ -48,15 +48,18 @@ namespace Sales.ViewModels.ClientViewModels
             _key = "";
             _isFocused = true;
             Clients = new ObservableCollection<Client>(_clientServ.GetClients());
-            _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();                   
+            _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
             _accountStatements.Add(new StatementVM { ID = 1, Statement = "سند دفع له" });
             _accountStatements.Add(new StatementVM { ID = 2, Statement = "سند قبض منه" });
             _accountStatements.Add(new StatementVM { ID = 5, Statement = "تسوية إضافة له" });
             _accountStatements.Add(new StatementVM { ID = 6, Statement = "تسوية تنزيل منه" });
+
+            clientAccounts = _clientAccountServ.GetAccounts();
+
             Load();
         }
 
-        private bool _isFocused ;
+        private bool _isFocused;
         public bool IsFocused
         {
             get { return _isFocused; }
@@ -132,7 +135,7 @@ namespace Sales.ViewModels.ClientViewModels
                 {
                     return _newDebt = OldDebt - Amount;
                 }
-                else if (SelectedStatement.Statement == "سند قبض منه" ||  SelectedStatement.Statement == "تسوية إضافة له")
+                else if (SelectedStatement.Statement == "سند قبض منه" || SelectedStatement.Statement == "تسوية إضافة له")
                 {
                     return _newDebt = OldDebt + Amount;
                 }
@@ -145,7 +148,7 @@ namespace Sales.ViewModels.ClientViewModels
             { SetProperty(ref _newDebt, value); }
         }
 
-        private string _key ;
+        private string _key;
         public string Key
         {
             get { return _key; }
@@ -180,7 +183,7 @@ namespace Sales.ViewModels.ClientViewModels
             }
         }
 
-        private ClientAccount _newClientAccount ;
+        private ClientAccount _newClientAccount;
         public ClientAccount NewClientAccount
         {
             get { return _newClientAccount; }
@@ -194,7 +197,7 @@ namespace Sales.ViewModels.ClientViewModels
             set { SetProperty(ref _clients, value); }
         }
 
-        private ObservableCollection<StatementVM> _accountStatements ;
+        private ObservableCollection<StatementVM> _accountStatements;
         public ObservableCollection<StatementVM> AccountStatements
         {
             get { return _accountStatements; }
@@ -239,7 +242,7 @@ namespace Sales.ViewModels.ClientViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            ClientsAccounts = new ObservableCollection<ClientAccount>(_clientAccountServ.SearchClientsAccounts(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -257,7 +260,7 @@ namespace Sales.ViewModels.ClientViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            ClientsAccounts = new ObservableCollection<ClientAccount>(_clientAccountServ.SearchClientsAccounts(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _delete;
@@ -282,7 +285,8 @@ namespace Sales.ViewModels.ClientViewModels
             {
                 _clientAccountServ.DeleteAccount(_selectedClientAccount);
                 _safeServ.DeleteSafe(_selectedClientAccount.RegistrationDate);
-                Load();
+                clientAccounts.Remove(_selectedClientAccount);
+                GetCurrentPage();
             }
         }
 
@@ -322,7 +326,10 @@ namespace Sales.ViewModels.ClientViewModels
         {
             try
             {
-                OldDebt = _clientAccountServ.GetClientAccount(_selectedClient.ID) + _selectedClient.AccountStart;
+                if (_selectedClient != null)
+                    OldDebt = _clientAccountServ.GetClientAccount(_selectedClient.ID) + _selectedClient.AccountStart;
+                else
+                    OldDebt = null;
             }
             catch
             {
@@ -387,7 +394,8 @@ namespace Sales.ViewModels.ClientViewModels
                 _newClientAccount.Debit = 0;
             }
 
-            _clientAccountServ.AddAccount(_newClientAccount);
+            var newAccount = _clientAccountServ.AddAccount(_newClientAccount);
+            clientAccounts.Add(_clientAccountServ.GetAccount());
             SelectedStatement = null;
             NewClientAccount = new ClientAccount
             {
@@ -438,5 +446,13 @@ namespace Sales.ViewModels.ClientViewModels
             }
 
         }
+
+        // helper methods
+
+        private void GetCurrentPage()
+        {
+            ClientsAccounts = new ObservableCollection<ClientAccount>(clientAccounts.Where(w => (w.Statement + w.Client.Name).Contains(_key)).OrderByDescending(o => o.RegistrationDate).Skip((_currentPage - 1) * 17).Take(17));
+        }
+
     }
 }

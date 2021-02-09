@@ -10,22 +10,24 @@ namespace Sales.Services
     {
         ClientServices clientServ = new ClientServices();
 
-        public void AddAccount(ClientAccount account)
+        public ClientAccount AddAccount(ClientAccount account)
         {
             using (SalesDB db = new SalesDB())
             {
                 db.ClientsAccounts.Add(account);
                 db.SaveChanges();
+                return account;
             }
         }
 
-        public void DeleteAccount(ClientAccount account)
+        public ClientAccount DeleteAccount(ClientAccount account)
         {
             using (SalesDB db = new SalesDB())
             {
                 db.ClientsAccounts.Attach(account);
                 db.ClientsAccounts.Remove(account);
                 db.SaveChanges();
+                return account;
             }
         }
 
@@ -38,11 +40,19 @@ namespace Sales.Services
             }
         }
 
-        public int GetClientsAccountsNumer(string key)
+        public List<ClientAccount> GetAccounts()
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.ClientsAccounts.Include(i => i.Client).Where(w => (w.Statement + w.Client.Name).Contains(key)).Count();
+                return db.ClientsAccounts.Include(i => i.Client).OrderByDescending(o => o.RegistrationDate).ToList();
+            }
+        }
+
+        public ClientAccount GetAccount()
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.ClientsAccounts.Include(i => i.Client).OrderByDescending(o=>o.ID).FirstOrDefault();
             }
         }
 
@@ -123,15 +133,7 @@ namespace Sales.Services
                 return db.ClientsAccounts.Where(w => w.ClientID == clientID && w.Date >= dtFrom && w.Date <= dtTo).OrderByDescending(o => o.RegistrationDate).ToList();
             }
         }
-
-        public List<ClientAccount> SearchClientsAccounts(string search, int page)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.ClientsAccounts.Include(i => i.Client).Where(w => (w.Statement + w.Client.Name).Contains(search)).OrderByDescending(o => o.RegistrationDate).Skip((page - 1) * 17).Take(17).ToList();
-            }
-        }
-
+      
         public List<ClientAccount> SearchClientsAccounts(string search, int page, DateTime dtFrom, DateTime dtTo)
         {
             using (SalesDB db = new SalesDB())
@@ -141,3 +143,4 @@ namespace Sales.Services
         }
     }
 }
+
