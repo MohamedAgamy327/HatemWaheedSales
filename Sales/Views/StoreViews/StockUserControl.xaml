@@ -87,8 +87,6 @@
                                >
                 <DataGrid.Columns>
                     <DataGridTextColumn IsReadOnly="True"  Header="المخزن" Width="5*"  HeaderStyle="{StaticResource ColumnHeaderStyle}"   Binding="{Binding Name}" />
-                    <DataGridTextColumn IsReadOnly="True" Header="عدد الأصناف" Width="2*" HeaderStyle="{StaticResource ColumnHeaderStyle}"
-                                    Binding="{Binding Categories.Count}"  />
 
                     <DataGridTemplateColumn  Header="حذف" Width="1*" HeaderStyle="{StaticResource ColumnHeaderStyle}" >
                         <DataGridTemplateColumn.CellTemplate>
@@ -98,11 +96,6 @@
                                     <iconPacks:PackIconMaterial Kind="DeleteForever" />
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource MetroCircleButtonStyle}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Categories.Count, Converter={StaticResource GreaterThanConverter}}" Value="1"  >
-                                                    <Setter Property="IsEnabled" Value="False"></Setter>
-                                                </DataTrigger>
-                                            </Style.Triggers>
                                         </Style>
                                     </Button.Style>
                                 </Button>

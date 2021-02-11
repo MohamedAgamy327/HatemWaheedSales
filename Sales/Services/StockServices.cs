@@ -36,17 +36,11 @@ namespace Sales.Services
             }
         }
 
-        public List<string> GetStocksSuggetions()
+        public bool IsExistInCategories(int id)
         {
             using (SalesDB db = new SalesDB())
             {
-                List<string> newData = new List<string>();
-                var data = db.Stocks.OrderBy(o => o.Name).Select(s => new { s.Name }).ToList();
-                foreach (var item in data)
-                {
-                    newData.Add(item.Name);
-                }
-                return newData;
+                return db.Categories.Any(s => s.StockID == id);
             }
         }
 
@@ -54,7 +48,7 @@ namespace Sales.Services
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Stocks.OrderBy(o => o.Name).Include(c => c.Categories).ToList();
+                return db.Stocks.OrderBy(o => o.Name).ToList();
             }
         }
     }

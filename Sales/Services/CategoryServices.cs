@@ -9,7 +9,6 @@ namespace Sales.Services
     public class CategoryServices
     {
         CategoryVM categoryInfo = new CategoryVM();
-        //List<CategoryVM> requiredCategories = new List<CategoryVM>();
 
         public void AddCategory(Category category)
         {
@@ -207,7 +206,7 @@ namespace Sales.Services
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Categories.Include(i => i.Company).Include(s => s.Stock).Where(w => (w.Name + w.Color + w.Company.Name + w.Stock.Name).Contains(key)).OrderBy(o => o.Company.Name).ThenBy(t => t.Name).Skip((page - 1) * 17).Take(17).Include(i => i.SuppliesCategories).Include(i => i.SalesCategories).ToList();
+                return db.Categories.AsNoTracking().Include(i => i.Company).Include(s => s.Stock).Where(w => (w.Name + w.Color + w.Company.Name + w.Stock.Name).Contains(key)).OrderBy(o => o.Company.Name).ThenBy(t => t.Name).Skip((page - 1) * 17).Take(17).Include(i => i.SuppliesCategories).Include(i => i.SalesCategories).ToList();
             }
         }
 
@@ -236,7 +235,7 @@ namespace Sales.Services
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Categories.Where(w => w.Isarchived == false).Include(s => s.Company).OrderBy(o => o.Name).Select(k => new CategoryVM
+                return db.Categories.AsNoTracking().Where(w => w.Isarchived == false).Include(s => s.Company).OrderBy(o => o.Name).Select(k => new CategoryVM
                 {
                     Category = k.Name + " " + k.Company.Name,
                     ID = k.ID,
@@ -263,15 +262,5 @@ namespace Sales.Services
 
             }
         }
-
-        //public List<CategoryVM> GetRequiredCategories(string key, int page)
-        //{
-        //    return requiredCategories.OrderBy(o => o.Company).ThenBy(t => t.Category).Where(w => w.Isarchived == false && (w.Company + w.Category + w.Stock).Contains(key)).Skip((page - 1) * 17).Take(17).ToList();
-        //}
-
-        //public List<CategoryVM> GetAllRequiredCategories()
-        //{
-        //    return requiredCategories.ToList();
-        //}
     }
 }

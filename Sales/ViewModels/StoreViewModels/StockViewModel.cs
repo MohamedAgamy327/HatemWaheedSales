@@ -44,7 +44,6 @@ namespace Sales.ViewModels.StoreViewModels
             _key = "";
             _isFocused = true;
             _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
-            _stocksSuggestions = _stockServ.GetStocksSuggetions();
             stocks = _stockServ.GetStocks();
             Load();
         }
@@ -113,13 +112,6 @@ namespace Sales.ViewModels.StoreViewModels
         {
             get { return _newStock; }
             set { SetProperty(ref _newStock, value); }
-        }
-
-        private List<string> _stocksSuggestions;
-        public List<string> StocksSuggestions
-        {
-            get { return _stocksSuggestions; }
-            set { SetProperty(ref _stocksSuggestions, value); }
         }
 
         private ObservableCollection<Stock> _stocks;
@@ -192,7 +184,7 @@ namespace Sales.ViewModels.StoreViewModels
         }
         private async void DeleteMethod()
         {
-            MessageDialogResult result = await _currentWindow.ShowMessageAsync("تأكيد الحذف", "هل تـريــد حــذف هـذه الشركة؟", MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings()
+            MessageDialogResult result = await _currentWindow.ShowMessageAsync("تأكيد الحذف", "هل تـريــد حــذف هـذا المخزن؟", MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings()
             {
                 AffirmativeButtonText = "موافق",
                 NegativeButtonText = "الغاء",
@@ -201,6 +193,17 @@ namespace Sales.ViewModels.StoreViewModels
             });
             if (result == MessageDialogResult.Affirmative)
             {
+                if (_stockServ.IsExistInCategories(_selectedStock.ID))
+                {
+                    await _currentWindow.ShowMessageAsync("فشل الحذف", "لا يمكن حذف هذا المخزن", MessageDialogStyle.Affirmative, new MetroDialogSettings()
+                    {
+                        AffirmativeButtonText = "موافق",
+                        DialogMessageFontSize = 25,
+                        DialogTitleFontSize = 30
+                    });
+                    return;
+                }
+
                 _stockServ.DeleteStock(_selectedStock);
                 stocks.Remove(_selectedStock);
                 GetCurrentPage();
@@ -239,7 +242,7 @@ namespace Sales.ViewModels.StoreViewModels
         {
             if (_stockServ.GetStock(_newStock.Name) != null)
             {
-                await _currentWindow.ShowMessageAsync("فشل الإضافة", "هذه الشركة موجودة مسبقاً", MessageDialogStyle.Affirmative, new MetroDialogSettings()
+                await _currentWindow.ShowMessageAsync("فشل الإضافة", "هذا المخزن موجودة مسبقاً", MessageDialogStyle.Affirmative, new MetroDialogSettings()
                 {
                     AffirmativeButtonText = "موافق",
                     DialogMessageFontSize = 25,
@@ -248,9 +251,8 @@ namespace Sales.ViewModels.StoreViewModels
             }
             else
             {
-               _newStock= _stockServ.AddStock(_newStock);
+                _newStock = _stockServ.AddStock(_newStock);
                 stocks.Add(_newStock);
-                _stocksSuggestions.Add(_newStock.Name);
                 NewStock = new Stock();
                 await _currentWindow.ShowMessageAsync("نجاح الإضافة", "تم الإضافة بنجاح", MessageDialogStyle.Affirmative, new MetroDialogSettings()
                 {
