@@ -17,6 +17,7 @@ namespace Sales.ViewModels.StoreViewModels
     {
         MetroWindow _currentWindow;
         private readonly CompanyAddDialog _companyAddDialog;
+        List<Company> companies;
 
         CompanyServices _companyServ;
 
@@ -24,15 +25,15 @@ namespace Sales.ViewModels.StoreViewModels
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _companyServ.GetCompaniesNumer(Key);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_companyServ.GetCompaniesNumer(_key) / 17));
+            TotalRecords = companies.Where(w => (w.Name).Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            Companies = new ObservableCollection<Company>(_companyServ.SearchCompanies(_key, _currentPage));
+            GetCurrentPage();
         }
 
         public CompanyViewModel()
@@ -43,7 +44,7 @@ namespace Sales.ViewModels.StoreViewModels
             _key = "";
             _isFocused = true;
             _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
-            _companiesSuggestions = _companyServ.GetCompaniesSuggetions();
+            companies = _companyServ.GetCompanies();
             Load();
         }
 
@@ -113,13 +114,6 @@ namespace Sales.ViewModels.StoreViewModels
             set { SetProperty(ref _newCompany, value); }
         }
 
-        private List<string> _companiesSuggestions ;
-        public List<string> CompaniesSuggestions
-        {
-            get { return _companiesSuggestions; }
-            set { SetProperty(ref _companiesSuggestions, value); }
-        }
-
         private ObservableCollection<Company> _companies;
         public ObservableCollection<Company> Companies
         {
@@ -158,7 +152,7 @@ namespace Sales.ViewModels.StoreViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            Companies = new ObservableCollection<Company>(_companyServ.SearchCompanies(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -176,7 +170,7 @@ namespace Sales.ViewModels.StoreViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            Companies = new ObservableCollection<Company>(_companyServ.SearchCompanies(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _delete;
@@ -199,8 +193,19 @@ namespace Sales.ViewModels.StoreViewModels
             });
             if (result == MessageDialogResult.Affirmative)
             {
+                if (_companyServ.IsExistInCategories(_selectedCompany.ID))
+                {
+                    await _currentWindow.ShowMessageAsync("فشل الحذف", "لا يمكن حذف هذه الشركة", MessageDialogStyle.Affirmative, new MetroDialogSettings()
+                    {
+                        AffirmativeButtonText = "موافق",
+                        DialogMessageFontSize = 25,
+                        DialogTitleFontSize = 30
+                    });
+                    return;
+                }
                 _companyServ.DeleteCompany(_selectedCompany);
-                Load();
+                companies.Remove(_selectedCompany);
+                GetCurrentPage();
             }
         }
 
@@ -246,7 +251,7 @@ namespace Sales.ViewModels.StoreViewModels
             else
             {
                 _companyServ.AddCompany(_newCompany);
-                _companiesSuggestions.Add(_newCompany.Name);
+                companies.Add(_newCompany);
                 NewCompany = new Company();
                 await _currentWindow.ShowMessageAsync("نجاح الإضافة", "تم الإضافة بنجاح", MessageDialogStyle.Affirmative, new MetroDialogSettings()
                 {
@@ -282,6 +287,11 @@ namespace Sales.ViewModels.StoreViewModels
                     break;
             }
 
+        }
+
+        private void GetCurrentPage()
+        {
+            Companies = new ObservableCollection<Company>(companies.Where(w => (w.Name).Contains(_key)).OrderBy(o => o.Name).Skip((_currentPage - 1) * 17).Take(17));
         }
 
     }

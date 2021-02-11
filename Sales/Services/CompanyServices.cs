@@ -1,6 +1,5 @@
 ﻿using Sales.Models;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 
 namespace Sales.Services
@@ -26,33 +25,11 @@ namespace Sales.Services
             }
         }
 
-        public int GetCompaniesNumer(string key)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Companies.Where(w => w.Name.Contains(key)).Count();
-            }
-        }
-
         public Company GetCompany(string name)
         {
             using (SalesDB db = new SalesDB())
             {
                 return db.Companies.SingleOrDefault(s => s.Name == name);
-            }
-        }
-
-        public List<string> GetCompaniesSuggetions()
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                List<string> newData = new List<string>();
-                var data = db.Companies.OrderBy(o => o.Name).Select(s => new { s.Name }).ToList();
-                foreach (var item in data)
-                {
-                    newData.Add(item.Name);
-                }
-                return newData;
             }
         }
 
@@ -64,12 +41,13 @@ namespace Sales.Services
             }
         }
     
-        public List<Company> SearchCompanies(string search, int page)
+        public bool IsExistInCategories(int id)
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Companies.Where(w => (w.Name).Contains(search)).OrderBy(o => o.Name).Skip((page - 1) * 17).Take(17).Include(c => c.Categories).ToList();
+                return db.Categories.Any(s => s.CompanyID == id);
             }
         }
+
     }
 }
