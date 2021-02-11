@@ -8,8 +8,6 @@ namespace Sales.Services
 {
     public class CategoryServices
     {
-        CategoryVM categoryInfo = new CategoryVM();
-
         public void AddCategory(Category category)
         {
             using (SalesDB db = new SalesDB())
@@ -38,18 +36,19 @@ namespace Sales.Services
             }
         }
 
-        public int GetAllCategoriesNumer(string key)
+        public bool IsExistInSupplies(int id)
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Categories.Include(i => i.Company).Include(s => s.Stock).Where(w => (w.Name + w.Company.Name + w.Stock.Name).Contains(key)).Count();
+                return db.SuppliesCategories.Any(s => s.CategoryID == id);
             }
         }
-        public int GetCategoriesNumer(string key)
+
+        public bool IsExistInSales(int id)
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Categories.Where(w => w.Isarchived == false).Include(i => i.Company).Include(s => s.Stock).Where(w => (w.Name + w.Company.Name + w.Stock.Name).Contains(key)).Count();
+                return db.SalesCategories.Any(s => s.CategoryID == id);
             }
         }
 
@@ -117,6 +116,7 @@ namespace Sales.Services
         {
             using (SalesDB db = new SalesDB())
             {
+                CategoryVM categoryInfo = new CategoryVM();
                 var category = db.Categories.Include(i => i.Company).Include(s => s.Stock).SingleOrDefault(s => s.ID == id);
                 categoryInfo.ID = category.ID;
                 categoryInfo.CompanyID = category.CompanyID;
@@ -136,14 +136,14 @@ namespace Sales.Services
             }
         }
 
-        public CategoryVM GetCategoryInformation(int id, DateTime dtFrom, DateTime dtTo)
+        public CategoryVM GetCategoryInformation(CategoryVM categoryInfo, DateTime dtFrom, DateTime dtTo)
         {
             using (SalesDB db = new SalesDB())
             {
-                decimal? supplyQty = db.SuppliesCategories.Where(w => w.CategoryID == id).Include(i => i.Supply).Where(w => w.Supply.Date >= dtFrom && w.Supply.Date <= dtTo).Sum(s => s.Qty);
-                decimal? supplyRecallQty = db.SuppliesRecalls.Where(w => w.CategoryID == id).Include(i => i.Supply).Where(w => w.Supply.Date >= dtFrom && w.Supply.Date <= dtTo).Sum(s => s.Qty);
-                decimal? supplyCost = db.SuppliesCategories.Where(w => w.CategoryID == id).Include(i => i.Supply).Where(w => w.Supply.Date >= dtFrom && w.Supply.Date <= dtTo).Sum(s => s.CostTotal);
-                decimal? recallCost = db.SuppliesRecalls.Where(w => w.CategoryID == id).Include(i => i.Supply).Where(w => w.Supply.Date >= dtFrom && w.Supply.Date <= dtTo).Sum(s => s.CostTotal);
+                decimal? supplyQty = db.SuppliesCategories.Where(w => w.CategoryID == categoryInfo.ID).Include(i => i.Supply).Where(w => w.Supply.Date >= dtFrom && w.Supply.Date <= dtTo).Sum(s => s.Qty);
+                decimal? supplyRecallQty = db.SuppliesRecalls.Where(w => w.CategoryID == categoryInfo.ID).Include(i => i.Supply).Where(w => w.Supply.Date >= dtFrom && w.Supply.Date <= dtTo).Sum(s => s.Qty);
+                decimal? supplyCost = db.SuppliesCategories.Where(w => w.CategoryID == categoryInfo.ID).Include(i => i.Supply).Where(w => w.Supply.Date >= dtFrom && w.Supply.Date <= dtTo).Sum(s => s.CostTotal);
+                decimal? recallCost = db.SuppliesRecalls.Where(w => w.CategoryID == categoryInfo.ID).Include(i => i.Supply).Where(w => w.Supply.Date >= dtFrom && w.Supply.Date <= dtTo).Sum(s => s.CostTotal);
                 if (supplyQty == null)
                     supplyQty = 0;
                 if (supplyRecallQty == null)
@@ -155,10 +155,10 @@ namespace Sales.Services
                 categoryInfo.SupplyQty = supplyQty - supplyRecallQty;
                 categoryInfo.SupplyCost = supplyCost - recallCost;
 
-                decimal? saleQty = db.SalesCategories.Where(w => w.CategoryID == id).Include(i => i.Sale).Where(w => w.Sale.Date >= dtFrom && w.Sale.Date <= dtTo).Sum(s => s.Qty);
-                decimal? saleRecallQty = db.SalesRecalls.Where(w => w.CategoryID == id).Include(i => i.Sale).Where(w => w.Sale.Date >= dtFrom && w.Sale.Date <= dtTo).Sum(s => s.Qty);
-                decimal? salePrice = db.SalesCategories.Where(w => w.CategoryID == id).Include(i => i.Sale).Where(w => w.Sale.Date >= dtFrom && w.Sale.Date <= dtTo).Sum(s => s.PriceTotal);
-                decimal? recallPrice = db.SalesRecalls.Where(w => w.CategoryID == id).Include(i => i.Sale).Where(w => w.Sale.Date >= dtFrom && w.Sale.Date <= dtTo).Sum(s => s.PriceTotal);
+                decimal? saleQty = db.SalesCategories.Where(w => w.CategoryID == categoryInfo.ID).Include(i => i.Sale).Where(w => w.Sale.Date >= dtFrom && w.Sale.Date <= dtTo).Sum(s => s.Qty);
+                decimal? saleRecallQty = db.SalesRecalls.Where(w => w.CategoryID == categoryInfo.ID).Include(i => i.Sale).Where(w => w.Sale.Date >= dtFrom && w.Sale.Date <= dtTo).Sum(s => s.Qty);
+                decimal? salePrice = db.SalesCategories.Where(w => w.CategoryID == categoryInfo.ID).Include(i => i.Sale).Where(w => w.Sale.Date >= dtFrom && w.Sale.Date <= dtTo).Sum(s => s.PriceTotal);
+                decimal? recallPrice = db.SalesRecalls.Where(w => w.CategoryID == categoryInfo.ID).Include(i => i.Sale).Where(w => w.Sale.Date >= dtFrom && w.Sale.Date <= dtTo).Sum(s => s.PriceTotal);
                 if (saleQty == null)
                     saleQty = 0;
                 if (saleRecallQty == null)
@@ -172,76 +172,6 @@ namespace Sales.Services
                 return categoryInfo;
             }
 
-        }
-
-        public List<string> GetCategoriesSuggetions()
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                List<string> newData = new List<string>();
-                var data = db.Categories.OrderBy(o => o.Name).Select(s => new { s.Name }).Distinct().ToList();
-                foreach (var item in data)
-                {
-                    newData.Add(item.Name);
-                }
-                return newData;
-            }
-        }
-
-        public List<string> GetColorsSuggetions()
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                List<string> newData = new List<string>();
-                var data = db.Categories.OrderBy(o => o.Color).Select(s => new { s.Color }).Distinct().ToList();
-                foreach (var item in data)
-                {
-                    newData.Add(item.Color);
-                }
-                return newData;
-            }
-        }
-
-        public List<Category> SearchAllCategories(string key, int page)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Categories.AsNoTracking().Include(i => i.Company).Include(s => s.Stock).Where(w => (w.Name + w.Color + w.Company.Name + w.Stock.Name).Contains(key)).OrderBy(o => o.Company.Name).ThenBy(t => t.Name).Skip((page - 1) * 17).Take(17).Include(i => i.SuppliesCategories).Include(i => i.SalesCategories).ToList();
-            }
-        }
-
-        public List<Category> SearchCategories(string key, int page)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Categories.Include(i => i.Company).Include(s => s.Stock).Where(w => w.Isarchived == false && (w.Name + w.Color + w.Company.Name + w.Stock.Name).Contains(key)).OrderBy(o => o.Company.Name).ThenBy(t => t.Name).Skip((page - 1) * 17).Take(17).Include(i => i.SuppliesCategories).Include(i => i.SalesCategories).ToList();
-            }
-        }
-
-        public List<CategoryVM> GetAllCategories()
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Categories.Include(s => s.Company).OrderBy(o => o.Name).Select(k => new CategoryVM
-                {
-                    Category = k.Name + " " + k.Company.Name,
-                    ID = k.ID,
-                    Color = k.Color
-                }).ToList();
-            }
-        }
-
-        public List<CategoryVM> GetCategories()
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Categories.AsNoTracking().Where(w => w.Isarchived == false).Include(s => s.Company).OrderBy(o => o.Name).Select(k => new CategoryVM
-                {
-                    Category = k.Name + " " + k.Company.Name,
-                    ID = k.ID,
-                    Color = k.Color
-                }).ToList();
-            }
         }
 
         public List<CategoryVM> GetRequiredCategories()
@@ -262,5 +192,73 @@ namespace Sales.Services
 
             }
         }
+
+        public List<CategoryVM> GetActiveCategories()
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.Categories.AsNoTracking().Where(w => w.Isarchived == false).Include(s => s.Company).OrderBy(o => o.Name).Select(k => new CategoryVM
+                {
+                    Category = k.Name + " " + k.Company.Name,
+                    ID = k.ID,
+                    Color = k.Color
+                }).ToList();
+            }
+        }
+
+        public List<Category> GetCategories()
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.Categories.AsNoTracking().Include(i => i.Company).Include(s => s.Stock).OrderBy(o => o.Company.Name).ThenBy(t => t.Name).ToList();
+            }
+        }
+
+
+
+        public List<CategoryVM> GetAllCategories()
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.Categories.Include(s => s.Company).OrderBy(o => o.Name).Select(k => new CategoryVM
+                {
+                    Category = k.Name + " " + k.Company.Name,
+                    ID = k.ID,
+                    Color = k.Color
+                }).ToList();
+            }
+        }
+        public int GetAllCategoriesNumer(string key)
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.Categories.Include(i => i.Company).Include(s => s.Stock).Where(w => (w.Name + w.Company.Name + w.Stock.Name).Contains(key)).Count();
+            }
+        }
+
+        public int GetCategoriesNumer(string key)
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.Categories.Where(w => w.Isarchived == false).Include(i => i.Company).Include(s => s.Stock).Where(w => (w.Name + w.Company.Name + w.Stock.Name).Contains(key)).Count();
+            }
+        }
+
+        public List<Category> SearchAllCategories(string key, int page)
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.Categories.AsNoTracking().Include(i => i.Company).Include(s => s.Stock).Where(w => (w.Name + w.Color + w.Company.Name + w.Stock.Name).Contains(key)).OrderBy(o => o.Company.Name).ThenBy(t => t.Name).Skip((page - 1) * 17).Take(17).Include(i => i.SuppliesCategories).Include(i => i.SalesCategories).ToList();
+            }
+        }
+
+        public List<Category> SearchCategories(string key, int page)
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.Categories.Include(i => i.Company).Include(s => s.Stock).Where(w => w.Isarchived == false && (w.Name + w.Color + w.Company.Name + w.Stock.Name).Contains(key)).OrderBy(o => o.Company.Name).ThenBy(t => t.Name).Skip((page - 1) * 17).Take(17).Include(i => i.SuppliesCategories).Include(i => i.SalesCategories).ToList();
+            }
+        }
+
     }
 }

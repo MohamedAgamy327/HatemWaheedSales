@@ -183,7 +183,6 @@ namespace Sales.ViewModels.StoreViewModels
             //requiredCategoryRPT.PrintToPrinter(1, true, 0, 0);
         }
 
-
         private void GetCurrentPage()
         {
             Categories = new ObservableCollection<CategoryVM>(categories.Where(w => (w.Company + w.Category + w.Stock).Contains(_key)).Skip((_currentPage - 1) * 17).Take(17));

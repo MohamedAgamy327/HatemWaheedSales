@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 
+
 namespace Sales.ViewModels.StoreViewModels
 {
     public class CategoryViewModel : ValidatableBindableBase
@@ -20,6 +21,8 @@ namespace Sales.ViewModels.StoreViewModels
         private readonly CategoryUpdateDialog _categoryUpdateDialog;
         private readonly CategoryInformationDialog _categoryInformationDialog;
 
+        List<Category> categories;
+
         StockServices _stockServ;
         CompanyServices _companyServ;
         CategoryServices _categoryServ;
@@ -28,19 +31,19 @@ namespace Sales.ViewModels.StoreViewModels
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _categoryServ.GetAllCategoriesNumer(Key);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_categoryServ.GetAllCategoriesNumer(_key) / 17));
+            TotalRecords = categories.Where(w => (w.Name + w.Company.Name + w.Stock.Name).Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            Categories = new ObservableCollection<Category>(_categoryServ.SearchAllCategories(_key, _currentPage));
+            GetCurrentPage();
         }
 
         public CategoryViewModel()
-        {          
+        {
             _stockServ = new StockServices();
             _companyServ = new CompanyServices();
             _categoryServ = new CategoryServices();
@@ -51,10 +54,11 @@ namespace Sales.ViewModels.StoreViewModels
             _key = "";
             _isFocused = true;
             _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
-            _categoriesSuggestions = _categoryServ.GetCategoriesSuggetions();
-            _colorsSuggestions = _categoryServ.GetColorsSuggetions();   
+            categories = _categoryServ.GetCategories();
+            _colorsSuggestions = categories.Select(s => s.Color).Distinct().ToList();
             Stocks = new ObservableCollection<Stock>(_stockServ.GetStocks());
             Companies = new ObservableCollection<Company>(_companyServ.GetCompanies());
+
             Load();
         }
 
@@ -166,13 +170,6 @@ namespace Sales.ViewModels.StoreViewModels
             set { SetProperty(ref _newCategory, value); }
         }
 
-        private List<string> _categoriesSuggestions;
-        public List<string> CategoriesSuggestions
-        {
-            get { return _categoriesSuggestions; }
-            set { SetProperty(ref _categoriesSuggestions, value); }
-        }
-
         private List<string> _colorsSuggestions;
         public List<string> ColorsSuggestions
         {
@@ -232,7 +229,7 @@ namespace Sales.ViewModels.StoreViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            Categories = new ObservableCollection<Category>(_categoryServ.SearchAllCategories(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -250,7 +247,7 @@ namespace Sales.ViewModels.StoreViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            Categories = new ObservableCollection<Category>(_categoryServ.SearchAllCategories(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _delete;
@@ -273,8 +270,19 @@ namespace Sales.ViewModels.StoreViewModels
             });
             if (result == MessageDialogResult.Affirmative)
             {
+                if (_categoryServ.IsExistInSupplies(_selectedCategory.ID) || _categoryServ.IsExistInSales(_selectedCategory.ID))
+                {
+                    await _currentWindow.ShowMessageAsync("فشل الحذف", "لا يمكن حذف هذا الصنف", MessageDialogStyle.Affirmative, new MetroDialogSettings()
+                    {
+                        AffirmativeButtonText = "موافق",
+                        DialogMessageFontSize = 25,
+                        DialogTitleFontSize = 30
+                    });
+                    return;
+                }
                 _categoryServ.DeleteCategory(_selectedCategory);
-                Load();
+                categories.Remove(_selectedCategory);
+                GetCurrentPage();
             }
         }
 
@@ -310,29 +318,19 @@ namespace Sales.ViewModels.StoreViewModels
         {
             if (SelectedCompany == null || SelectedStock == null || NewCategory.Name == null || NewCategory.QtyStart == null || NewCategory.Price == null || NewCategory.Cost == null || NewCategory.RequestLimit == null)
                 return;
-            //if (_categoryServ.GetCategory(_newCategory.Name, _newCategory.CompanyID) != null)
-            //{
-            //    await _currentWindow.ShowMessageAsync("فشل الإضافة", "هذاالصنف موجود مسبقاً", MessageDialogStyle.Affirmative, new MetroDialogSettings()
-            //    {
-            //        AffirmativeButtonText = "موافق",
-            //        DialogMessageFontSize = 25,
-            //        DialogTitleFontSize = 30
-            //    });
-            //}
-            //else
-            //{
-                _newCategory.Qty = _newCategory.QtyStart;
-                _categoryServ.AddCategory(_newCategory);
-                _categoriesSuggestions.Add(_newCategory.Name);
-                _colorsSuggestions.Add(_newCategory.Color);
-                NewCategory = new Category();
-                await _currentWindow.ShowMessageAsync("نجاح الإضافة", "تم الإضافة بنجاح", MessageDialogStyle.Affirmative, new MetroDialogSettings()
-                {
-                    AffirmativeButtonText = "موافق",
-                    DialogMessageFontSize = 25,
-                    DialogTitleFontSize = 30
-                });
-            //}
+            _newCategory.Qty = _newCategory.QtyStart;
+            _categoryServ.AddCategory(_newCategory);
+            _colorsSuggestions.Add(_newCategory.Color);
+            _newCategory.Stock = SelectedStock;
+            _newCategory.Company = SelectedCompany;
+            categories.Add(_newCategory);
+            NewCategory = new Category();
+            await _currentWindow.ShowMessageAsync("نجاح الإضافة", "تم الإضافة بنجاح", MessageDialogStyle.Affirmative, new MetroDialogSettings()
+            {
+                AffirmativeButtonText = "موافق",
+                DialogMessageFontSize = 25,
+                DialogTitleFontSize = 30
+            });
         }
         private bool CanExecuteSave()
         {
@@ -355,10 +353,7 @@ namespace Sales.ViewModels.StoreViewModels
         }
         private async void ShowUpdateMethod()
         {
-            if (_selectedCategory.SuppliesCategories.Count > 0 || _selectedCategory.SalesCategories.Count > 0)
-                CanEdit = false;
-            else
-                CanEdit = true;
+            CanEdit = !(_categoryServ.IsExistInSupplies(_selectedCategory.ID) || _categoryServ.IsExistInSales(_selectedCategory.ID));
             _categoryUpdateDialog.DataContext = this;
             await _currentWindow.ShowMetroDialogAsync(_categoryUpdateDialog);
         }
@@ -378,11 +373,11 @@ namespace Sales.ViewModels.StoreViewModels
             if (SelectedCompany == null || SelectedCategory.QtyStart == null || SelectedCategory.Price == null || SelectedCategory.Cost == null || SelectedCategory.RequestLimit == null)
                 return;
 
-            if (_selectedCategory.SuppliesCategories.Count == 0 && _selectedCategory.SalesCategories.Count == 0)
+            if (!(_categoryServ.IsExistInSupplies(_selectedCategory.ID) || _categoryServ.IsExistInSales(_selectedCategory.ID)))
                 _selectedCategory.Qty = _selectedCategory.QtyStart;
-            _selectedCategory.Stock = _selectedStock;
+            _selectedCategory.Stock = SelectedStock;
+            _selectedCategory.Company = SelectedCompany;
             _categoryServ.UpdateCategory(_selectedCategory);
-            _categoriesSuggestions.Add(_selectedCategory.Name);
             await _currentWindow.HideMetroDialogAsync(_categoryUpdateDialog);
             Load();
         }
@@ -390,7 +385,7 @@ namespace Sales.ViewModels.StoreViewModels
         {
             try
             {
-                return SelectedCategory!= null? !SelectedCategory.HasErrors : false;
+                return SelectedCategory != null ? !SelectedCategory.HasErrors : false;
             }
             catch
             {
@@ -414,7 +409,7 @@ namespace Sales.ViewModels.StoreViewModels
             DateFrom = _categoryServ.GetFirstDate(_selectedCategory.ID);
             DateTo = _categoryServ.GetLastDate(_selectedCategory.ID);
             SelectedCategoryInformation = _categoryServ.GetCategoryInformation(_selectedCategory.ID);
-            SelectedCategoryInformation = _categoryServ.GetCategoryInformation(_selectedCategory.ID, _dateFrom, _dateTo);
+            SelectedCategoryInformation = _categoryServ.GetCategoryInformation(SelectedCategoryInformation, _dateFrom, _dateTo);
             _categoryInformationDialog.DataContext = this;
             await _currentWindow.ShowMetroDialogAsync(_categoryInformationDialog);
         }
@@ -430,7 +425,7 @@ namespace Sales.ViewModels.StoreViewModels
         }
         private void GetInformationMethod()
         {
-            SelectedCategoryInformation = _categoryServ.GetCategoryInformation(_selectedCategory.ID, _dateFrom, _dateTo);
+            SelectedCategoryInformation = _categoryServ.GetCategoryInformation(SelectedCategoryInformation, _dateFrom, _dateTo);
         }
 
         private RelayCommand<string> _closeDialog;
@@ -452,7 +447,6 @@ namespace Sales.ViewModels.StoreViewModels
                     break;
                 case "Update":
                     await _currentWindow.HideMetroDialogAsync(_categoryUpdateDialog);
-                    Load();
                     break;
                 case "Information":
                     await _currentWindow.HideMetroDialogAsync(_categoryInformationDialog);
@@ -462,5 +456,12 @@ namespace Sales.ViewModels.StoreViewModels
             }
 
         }
+
+
+        private void GetCurrentPage()
+        {
+            Categories = new ObservableCollection<Category>(categories.Where(w => (w.Name + w.Company.Name + w.Stock.Name).Contains(_key)).OrderBy(o => o.Company.Name).ThenBy(o => o.Name).Skip((_currentPage - 1) * 17).Take(17));
+        }
+
     }
 }

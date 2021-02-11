@@ -766,7 +766,6 @@ D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\App.g.cs
 D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\GeneratedInternalTypeHelper.g.cs
 D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\Sales_MarkupCompile.cache
 D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\Sales_MarkupCompile.lref
-D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\Sales.csprojAssemblyReference.cache
 D:\Projects\Working\Hatem Waheed\Sales\Sales\bin\Debug\Sales.exe.config
 D:\Projects\Working\Hatem Waheed\Sales\Sales\bin\Debug\Sales.exe
 D:\Projects\Working\Hatem Waheed\Sales\Sales\bin\Debug\Sales.pdb

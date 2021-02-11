@@ -58,7 +58,7 @@ namespace Sales.ViewModels.ClientViewModels
             _key = "";
             _isFocused = true;
             _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
-            _categories = new ObservableCollection<CategoryVM>(_categoryServ.GetCategories());
+            _categories = new ObservableCollection<CategoryVM>(_categoryServ.GetActiveCategories());
             _namesSuggestions = _clientServ.GetNamesSuggetions();
             _addressSuggestions = _clientServ.GetAddressSuggetions();
             Load();
