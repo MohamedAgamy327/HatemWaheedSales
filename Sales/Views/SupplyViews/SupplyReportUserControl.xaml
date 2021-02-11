@@ -12,8 +12,7 @@
              mc:Ignorable="d" 
              FlowDirection="RightToLeft"
              d:DesignHeight="600"
-             d:DesignWidth="800"
-             DataContext="{Binding SupplyReport, Source={StaticResource Locator}}">
+             d:DesignWidth="800">
 
     <UserControl.Resources>
 

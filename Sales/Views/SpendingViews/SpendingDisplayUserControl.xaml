@@ -12,7 +12,7 @@
              FlowDirection="RightToLeft"
              d:DesignHeight="600"
              d:DesignWidth="800"
-             DataContext="{Binding SpendingDisplay, Source={StaticResource Locator}}">
+         >
 
     <UserControl.Resources>
 

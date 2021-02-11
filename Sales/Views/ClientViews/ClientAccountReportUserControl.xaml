@@ -11,8 +11,7 @@
              mc:Ignorable="d" 
              FlowDirection="RightToLeft"
              d:DesignHeight="600"
-             d:DesignWidth="1000"
-             DataContext="{Binding ClientAccountReport, Source={StaticResource Locator}}">
+             d:DesignWidth="1000">
 
     <UserControl.Resources>
 
