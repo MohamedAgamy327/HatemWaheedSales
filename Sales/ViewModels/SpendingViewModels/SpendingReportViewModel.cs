@@ -15,16 +15,16 @@ namespace Sales.ViewModels.SpendingViewModels
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _spendingServ.GetSpendingsNumer(Key, _dateFrom, _dateTo);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_spendingServ.GetSpendingsNumer(_key, _dateFrom, _dateTo) / 17));
+         //   TotalRecords = _spendingServ.GetSpendingsNumer(Key, _dateFrom, _dateTo);
+         //   LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_spendingServ.GetSpendingsNumer(_key, _dateFrom, _dateTo) / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            TotalAmount = _spendingServ.GetTotalAmount(_key, _dateFrom, _dateTo);
-            Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage, _dateFrom, _dateTo));
+          //  TotalAmount = _spendingServ.GetTotalAmount(_key, _dateFrom, _dateTo);
+           // Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage, _dateFrom, _dateTo));
         }
 
         public SpendingReportViewModel()
@@ -146,7 +146,7 @@ namespace Sales.ViewModels.SpendingViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage, _dateFrom, _dateTo));
+           // Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage, _dateFrom, _dateTo));
         }
 
         private RelayCommand _previous;
@@ -164,7 +164,7 @@ namespace Sales.ViewModels.SpendingViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage, _dateFrom, _dateTo));
+          //  Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage, _dateFrom, _dateTo));
         }
 
     }

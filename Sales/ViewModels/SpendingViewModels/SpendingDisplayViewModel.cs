@@ -18,6 +18,8 @@ namespace Sales.ViewModels.SpendingViewModels
         private MetroWindow _currentWindow;
         private readonly SpendingAddDialog _spendingAddDialog;
 
+        List<Spending> spendings;
+
         private SafeServices _safeServ;
         private SpendingServices _spendingServ;
 
@@ -25,15 +27,15 @@ namespace Sales.ViewModels.SpendingViewModels
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _spendingServ.GetSpendingsNumer(Key);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_spendingServ.GetSpendingsNumer(_key) / 17));
+            TotalRecords = spendings.Where(w => w.Statement.Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage));
+            GetCurrentPage();
         }
 
         public SpendingDisplayViewModel()
@@ -44,8 +46,9 @@ namespace Sales.ViewModels.SpendingViewModels
 
             _key = "";
             _isFocused = true;
-            _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();         
+            _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
             _statementSuggestions = _spendingServ.GetStatementSuggetions();
+            spendings = _spendingServ.GetSpendings();
             Load();
         }
 
@@ -115,7 +118,7 @@ namespace Sales.ViewModels.SpendingViewModels
             set { SetProperty(ref _newSpending, value); }
         }
 
-        private List<string> _statementSuggestions ;
+        private List<string> _statementSuggestions;
         public List<string> StatementSuggestions
         {
             get { return _statementSuggestions; }
@@ -160,7 +163,7 @@ namespace Sales.ViewModels.SpendingViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -178,7 +181,7 @@ namespace Sales.ViewModels.SpendingViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _delete;
@@ -203,6 +206,7 @@ namespace Sales.ViewModels.SpendingViewModels
             {
                 _spendingServ.DeleteSpending(_selectedSpending);
                 _safeServ.DeleteSafe(_selectedSpending.RegistrationDate);
+                spendings.Remove(_selectedSpending);
                 Load();
             }
         }
@@ -242,7 +246,8 @@ namespace Sales.ViewModels.SpendingViewModels
                 return;
             DateTime dt = DateTime.Now;
             _newSpending.RegistrationDate = dt;
-            _spendingServ.AddSpending(_newSpending);
+            _newSpending = _spendingServ.AddSpending(_newSpending);
+            spendings.Add(_spendingServ.GetLastSpending());
             Safe _safe = new Safe
             {
                 Amount = -_newSpending.Amount,
@@ -290,5 +295,11 @@ namespace Sales.ViewModels.SpendingViewModels
             }
 
         }
+
+        private void GetCurrentPage()
+        {
+            Spendings = new ObservableCollection<Spending>(spendings.Where(w => w.Statement.Contains(_key)).OrderByDescending(o => o.RegistrationDate).Skip((_currentPage - 1) * 17).Take(17));
+        }
+
     }
 }

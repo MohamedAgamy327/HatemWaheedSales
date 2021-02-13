@@ -2,7 +2,7 @@
 
 namespace Sales.Helpers
 {
-    class CurrencyInfo
+    internal class CurrencyInfo
     {
         public enum Currencies { Egypt = 0 };
         #region Constructors

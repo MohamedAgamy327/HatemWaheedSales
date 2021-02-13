@@ -92,13 +92,7 @@ namespace Sales.Services
         {
             using (SalesDB db = new SalesDB())
             {
-                List<string> newData = new List<string>();
-                var data = db.Safes.Where(w => w.CanDelete == true).OrderBy(o => o.Statement).Select(s => new { s.Statement }).Distinct().ToList();
-                foreach (var item in data)
-                {
-                    newData.Add(item.Statement);
-                }
-                return newData;
+                return db.Safes.Where(w => w.CanDelete == true).OrderBy(o => o.Statement).Select(s => s.Statement).Distinct().ToList();
             }
         }
 

@@ -1,18 +1,21 @@
 ﻿using Sales.Models;
+using Sales.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 
 namespace Sales.Services
 {
     public class SpendingServices
     {
-        public void AddSpending(Spending spending)
+        public Spending AddSpending(Spending spending)
         {
             using (SalesDB db = new SalesDB())
             {
-                db.Spendings.Add(spending);
+                spending = db.Spendings.Add(spending);
                 db.SaveChanges();
+                return spending;
             }
         }
 
@@ -23,30 +26,6 @@ namespace Sales.Services
                 db.Spendings.Attach(spending);
                 db.Spendings.Remove(spending);
                 db.SaveChanges();
-            }
-        }
-
-        public int GetSpendingsNumer(string key)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Spendings.Where(w => w.Statement.Contains(key)).Count();
-            }
-        }
-
-        public int GetSpendingsNumer(string key, DateTime dtFrom, DateTime dtTo)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Spendings.Where(w => w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Count();
-            }
-        }
-
-        public decimal? GetTotalAmount(string key, DateTime dtFrom, DateTime dtTo)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Spendings.Where(w => w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Sum(s => s.Amount);
             }
         }
 
@@ -64,20 +43,55 @@ namespace Sales.Services
             }
         }
 
-        public List<Spending> SearchSpendings(string search, int page)
+        public List<Spending> GetSpendings()
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Spendings.Where(w => (w.Statement).Contains(search)).OrderByDescending(o => o.RegistrationDate).Skip((page - 1) * 17).Take(17).ToList();
+                return db.Spendings.AsNoTracking().Where(c => c.RegistrationDate.Year == MainViewModel.Year).OrderByDescending(o => o.RegistrationDate).ToList();
             }
         }
 
-        public List<Spending> SearchSpendings(string search, int page, DateTime dtFrom, DateTime dtTo)
+        public Spending GetLastSpending()
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Spendings.Where(w => (w.Statement).Contains(search) && w.Date >= dtFrom && w.Date <= dtTo).OrderByDescending(o => o.RegistrationDate).Skip((page - 1) * 17).Take(17).ToList();
+                return db.Spendings.OrderByDescending(o=>o.RegistrationDate).FirstOrDefault();
             }
         }
+
+        public List<Spending> GetSpendings(DateTime dtFrom, DateTime dtTo)
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.Spendings.Where(w => w.Date >= dtFrom && w.Date <= dtTo).OrderByDescending(o => o.RegistrationDate).ToList();
+            }
+        }
+
+
+        //public int GetSpendingsNumer(string key)
+        //{
+        //    using (SalesDB db = new SalesDB())
+        //    {
+        //        return db.Spendings.Where(w => w.Statement.Contains(key)).Count();
+        //    }
+        //}
+
+        //public int GetSpendingsNumer(string key, DateTime dtFrom, DateTime dtTo)
+        //{
+        //    using (SalesDB db = new SalesDB())
+        //    {
+        //        return db.Spendings.Where(w => w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Count();
+        //    }
+        //}
+
+        //public decimal? GetTotalAmount(string key, DateTime dtFrom, DateTime dtTo)
+        //{
+        //    using (SalesDB db = new SalesDB())
+        //    {
+        //        return db.Spendings.Where(w => w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Sum(s => s.Amount);
+        //    }
+        //}
+
+
     }
 }

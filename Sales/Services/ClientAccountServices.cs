@@ -39,14 +39,6 @@ namespace Sales.Services
             }
         }
 
-        public List<ClientAccount> GetAccounts()
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.ClientsAccounts.Where(c => c.RegistrationDate.Year == MainViewModel.Year).Include(i => i.Client).OrderByDescending(o => o.RegistrationDate).ToList();
-            }
-        }
-
         public ClientAccount GetAccount(int id)
         {
             using (SalesDB db = new SalesDB())
@@ -63,6 +55,14 @@ namespace Sales.Services
                 if (_currentAccount == null)
                     _currentAccount = 0;
                 return _currentAccount;
+            }
+        }
+
+        public List<ClientAccount> GetAccounts()
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.ClientsAccounts.Where(c => c.RegistrationDate.Year == MainViewModel.Year).Include(i => i.Client).OrderByDescending(o => o.RegistrationDate).ToList();
             }
         }
 

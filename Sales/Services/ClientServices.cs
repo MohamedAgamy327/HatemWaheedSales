@@ -90,6 +90,6 @@ namespace Sales.Services
                 return db.Clients.OrderBy(o => o.Name).ToList();
             }
         }
- 
+
     }
 }
