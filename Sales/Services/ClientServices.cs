@@ -35,11 +35,35 @@ namespace Sales.Services
             }
         }
 
-        public int GetClientsNumer(string key)
+        public bool IsExistInSupplies(int id)
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Clients.Include(i => i.ClientAccounts).Where(w => (w.Name + w.Address + w.Telephone).Contains(key)).Count();
+                return db.Supplies.Any(s => s.ClientID == id);
+            }
+        }
+
+        public bool IsExistInSales(int id)
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.Sales.Any(s => s.ClientID == id);
+            }
+        }
+
+        public bool IsExistInClientInfo(int id)
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.ClientsInfo.Any(s => s.ClientID == id);
+            }
+        }
+
+        public bool IsExistInClientAccounts(int id)
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.ClientsAccounts.Any(s => s.ClientID == id);
             }
         }
 
@@ -59,34 +83,6 @@ namespace Sales.Services
             }
         }
 
-        public List<string> GetNamesSuggetions()
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                List<string> newData = new List<string>();
-                var data = db.Clients.OrderBy(o => o.Name).Select(s => new { s.Name }).Distinct().ToList();
-                foreach (var item in data)
-                {
-                    newData.Add(item.Name);
-                }
-                return newData;
-            }
-        }
-
-        public List<string> GetAddressSuggetions()
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                List<string> newData = new List<string>();
-                var data = db.Clients.OrderBy(o => o.Telephone).Select(s => new { s.Telephone }).Distinct().ToList();
-                foreach (var item in data)
-                {
-                    newData.Add(item.Telephone);
-                }
-                return newData;
-            }
-        }
-
         public List<Client> GetClients()
         {
             using (SalesDB db = new SalesDB())
@@ -94,13 +90,6 @@ namespace Sales.Services
                 return db.Clients.OrderBy(o => o.Name).ToList();
             }
         }
-
-        public List<Client> SearchClients(string key, int page)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Clients.Include(i => i.ClientAccounts).Where(w => (w.Name + w.Address + w.Telephone).Contains(key)).OrderBy(o => o.Name).Skip((page - 1) * 17).Take(17).ToList();
-            }
-        }      
+ 
     }
 }

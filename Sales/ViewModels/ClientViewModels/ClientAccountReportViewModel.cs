@@ -3,29 +3,32 @@ using Sales.Helpers;
 using Sales.Models;
 using Sales.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Sales.ViewModels.ClientViewModels
 {
     public class ClientAccountReportViewModel : ValidatableBindableBase
     {
         ClientAccountServices _clientAccountServ;
+        List<ClientAccount> accounts;
 
         private void Load()
         {   
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _clientAccountServ.GetClientsAccountsNumer(Key, _dateFrom, _dateTo);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_clientAccountServ.GetClientsAccountsNumer(_key, _dateFrom, _dateTo) / 17));
+            TotalRecords = accounts.Where(w => (w.Statement + w.Client.Name).Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            TotalDebit = _clientAccountServ.GetTotalDebit(_key, _dateFrom, _dateTo);
-            TotalCredit = _clientAccountServ.GetTotalCredit(_key, _dateFrom, _dateTo);
-            ClientsAccounts = new ObservableCollection<ClientAccount>(_clientAccountServ.SearchClientsAccounts(_key, _currentPage, _dateFrom, _dateTo));
+            TotalDebit =accounts.Where(w => (w.Statement + w.Client.Name).Contains(_key)).Sum(s => s.Debit);
+            TotalCredit =accounts.Where(w => (w.Statement + w.Client.Name).Contains(_key)).Sum(s => s.Credit);
+            GetCurrentPage();
         }
 
         public ClientAccountReportViewModel()
@@ -35,7 +38,8 @@ namespace Sales.ViewModels.ClientViewModels
             _key = "";
             _isFocused = true;            
             _dateTo = Convert.ToDateTime(DateTime.Now.ToShortDateString());
-            _dateFrom = Convert.ToDateTime(DateTime.Now.ToShortDateString()); 
+            _dateFrom = Convert.ToDateTime(DateTime.Now.ToShortDateString());
+            accounts = _clientAccountServ.GetAccounts(_dateFrom,_dateTo);
             Load();
         }
 
@@ -140,6 +144,21 @@ namespace Sales.ViewModels.ClientViewModels
             Load();
         }
 
+        private RelayCommand _searcByDate;
+        public RelayCommand SearchByDate
+        {
+            get
+            {
+                return _searcByDate
+                    ?? (_searcByDate = new RelayCommand(SearchByDateMethod));
+            }
+        }
+        private void SearchByDateMethod()
+        {
+            accounts = _clientAccountServ.GetAccounts(_dateFrom, _dateTo);
+            Load();
+        }
+
         private RelayCommand _next;
         public RelayCommand Next
         {
@@ -155,7 +174,7 @@ namespace Sales.ViewModels.ClientViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            ClientsAccounts = new ObservableCollection<ClientAccount>(_clientAccountServ.SearchClientsAccounts(_key, _currentPage, _dateFrom, _dateTo));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -173,7 +192,13 @@ namespace Sales.ViewModels.ClientViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            ClientsAccounts = new ObservableCollection<ClientAccount>(_clientAccountServ.SearchClientsAccounts(_key, _currentPage, _dateFrom, _dateTo));
+            GetCurrentPage();
         }
+
+        private void GetCurrentPage()
+        {
+            ClientsAccounts = new ObservableCollection<ClientAccount>(accounts.Where(w => (w.Statement + w.Client.Name).Contains(_key)).OrderByDescending(o => o.RegistrationDate).Skip((_currentPage - 1) * 17).Take(17));
+        }
+
     }
 }

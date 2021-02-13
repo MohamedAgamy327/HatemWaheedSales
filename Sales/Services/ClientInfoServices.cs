@@ -43,13 +43,14 @@ namespace Sales.Services
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.ClientsInfo.Where(w=>w.ClientID==clientID).Include(s =>s.Category).Include(i => i.Category.Company).OrderBy(o => o.Category.Name).Select(k => new ClientInfoVM
+                return db.ClientsInfo.Where(w => w.ClientID == clientID).Include(s => s.Category).Include(i => i.Category.Company).OrderBy(o => o.Category.Name).Select(k => new ClientInfoVM
                 {
-                    CategoryID=k.CategoryID,
-                    ClientID=k.ClientID,
-                    Price=k.Price,
+                    CategoryID = k.CategoryID,
+                    ClientID = k.ClientID,
+                    Price = k.Price,
                     Category = k.Category.Name + " " + k.Category.Company.Name,
-                    Color = k.Color
+                    Color = k.Color,
+                    Notes = k.Notes
                 }).ToList();
             }
         }

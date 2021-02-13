@@ -60,10 +60,10 @@
             <StackPanel Orientation="Horizontal" Grid.Column="1">
                 <TextBlock Margin="5,0" Style="{StaticResource TextBlockAddUpdateStyle}"> من</TextBlock>
 
-                <DatePicker SelectedDate="{Binding DateFrom,UpdateSourceTrigger=PropertyChanged}"    Margin="5,0" Style="{StaticResource DatePickerStyle}">
+                <DatePicker  SelectedDate="{Binding DateFrom,UpdateSourceTrigger=PropertyChanged}"    Margin="5,0" Style="{StaticResource DatePickerStyle}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectedDateChanged">
-                            <Custom:EventToCommand Command="{Binding Search}" />
+                            <Custom:EventToCommand Command="{Binding SearchByDate}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </DatePicker>
@@ -71,7 +71,7 @@
                 <DatePicker     SelectedDate="{Binding DateTo,UpdateSourceTrigger=PropertyChanged}" Margin="5,0" Style="{StaticResource DatePickerStyle}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectedDateChanged">
-                            <Custom:EventToCommand Command="{Binding Search}" />
+                            <Custom:EventToCommand Command="{Binding SearchByDate}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </DatePicker>
@@ -101,6 +101,15 @@
                                     Binding="{Binding Debit}"  />
 
             </DataGrid.Columns>
+
+            <DataGrid.Style>
+                <Style BasedOn="{StaticResource MetroDataGrid}"
+                       TargetType="{x:Type DataGrid}">
+                    <Setter Property="AlternatingRowBackground"
+                            Value="{DynamicResource GrayBrush10}" />
+                </Style>
+            </DataGrid.Style>
+
         </DataGrid>
         <StackPanel Margin="0,5"  Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
             <Button Command="{Binding Previous}" IsEnabled="{Binding ISFirst}" Margin="5,0"    Style="{DynamicResource MetroCircleButtonStyle}" BorderThickness="0"   >

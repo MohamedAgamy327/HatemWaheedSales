@@ -865,3 +865,4 @@ D:\Projects\Working\Hatem Waheed\Sales\Sales\bin\Debug\CrystalDecisions.ReportAp
 D:\Projects\Working\Hatem Waheed\Sales\Sales\bin\Debug\CrystalDecisions.ReportAppServer.CommonObjectModel.dll
 D:\Projects\Working\Hatem Waheed\Sales\Sales\bin\Debug\CrystalDecisions.ReportAppServer.ObjectFactory.dll
 D:\Projects\Working\Hatem Waheed\Sales\Sales\bin\Debug\CrystalDecisions.ReportAppServer.CommonControls.dll
+D:\Projects\Working\Hatem Waheed\Sales\Sales\obj\Debug\Sales.csprojAssemblyReference.cache

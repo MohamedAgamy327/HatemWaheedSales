@@ -19,10 +19,12 @@ namespace Sales.ViewModels.ClientViewModels
         MetroWindow _currentWindow;
         private readonly ClientAccountAddDialog _clientAccountAddDialog;
 
+        List<ClientAccount> clientAccounts;
+
         SafeServices _safeServ;
         ClientServices _clientServ;
         ClientAccountServices _clientAccountServ;
-        List<ClientAccount> clientAccounts;
+       
         private void Load()
         {
             CurrentPage = 1;
@@ -395,7 +397,7 @@ namespace Sales.ViewModels.ClientViewModels
             }
 
             _clientAccountServ.AddAccount(_newClientAccount);
-            clientAccounts.Add(_clientAccountServ.GetAccount());
+            clientAccounts.Add(_clientAccountServ.GetAccount(_newClientAccount.ID));
             SelectedStatement = null;
             NewClientAccount = new ClientAccount
             {

@@ -28,19 +28,24 @@
         </StackPanel>
         <StackPanel  Name="pnl" Orientation="Horizontal" Margin="0,5">
             <TextBlock Style="{StaticResource TextBlockStyle}" VerticalAlignment="Center" Margin="5,0">الصنف</TextBlock>
-            <ComboBox Name="First" Helpers:FocusExtension.IsFocused="{Binding IsFocused}" IsEditable="True" Margin="5,0" Width="250" ItemsSource="{Binding Categories}" SelectedValue="{Binding NewClientInfo.CategoryID}" SelectedValuePath="ID" DisplayMemberPath="Category" SelectedItem="{Binding SelectedCategory,UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ComboBoxStyle}">
+            <ComboBox Name="First" Helpers:FocusExtension.IsFocused="{Binding IsFocused}" IsEditable="True" Margin="5,0" Width="200" ItemsSource="{Binding Categories}" SelectedValue="{Binding NewClientInfo.CategoryID}" SelectedValuePath="ID" DisplayMemberPath="Category" SelectedItem="{Binding SelectedCategory,UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ComboBoxStyle}">
             </ComboBox>
 
-            <TextBox   Margin="5,0" Width="120" Height="40" FontSize="16"  FontWeight="Bold" FontFamily="Veranda"  VerticalContentAlignment="Center"
+            <TextBox   Margin="5,0" Width="100" Height="40" FontSize="16"  FontWeight="Bold" FontFamily="Veranda"  VerticalContentAlignment="Center"
                       Controls:TextBoxHelper.UseFloatingWatermark="True" Controls:TextBoxHelper.AutoWatermark="True"
                          Controls:TextBoxHelper.Watermark="اللون"  Text="{Binding NewClientInfo.Color, ValidatesOnNotifyDataErrors=True,UpdateSourceTrigger=PropertyChanged}" >
             </TextBox>
 
-            <Controls:NumericUpDown  HideUpDownButtons="True" HorizontalContentAlignment="Left" Margin="5,0" Width="120" Height="40" FontSize="16"  FontWeight="Bold" FontFamily="Veranda" Minimum="0.01" VerticalContentAlignment="Center"
+            <Controls:NumericUpDown  HideUpDownButtons="True" HorizontalContentAlignment="Left" Margin="5,0" Width="100" Height="40" FontSize="16"  FontWeight="Bold" FontFamily="Veranda" Minimum="0.01" VerticalContentAlignment="Center"
                       Controls:TextBoxHelper.UseFloatingWatermark="True" Controls:TextBoxHelper.AutoWatermark="True"
                          Controls:TextBoxHelper.Watermark="السعر"  Value="{Binding NewClientInfo.Price, ValidatesOnNotifyDataErrors=True,UpdateSourceTrigger=PropertyChanged}" >
             </Controls:NumericUpDown>
-       
+
+            <TextBox   Margin="5,0" Width="100" Height="40" FontSize="16"  FontWeight="Bold" FontFamily="Veranda"  VerticalContentAlignment="Center"
+                      Controls:TextBoxHelper.UseFloatingWatermark="True" Controls:TextBoxHelper.AutoWatermark="True"
+                         Controls:TextBoxHelper.Watermark="الملاحظات"  Text="{Binding NewClientInfo.Notes, ValidatesOnNotifyDataErrors=True,UpdateSourceTrigger=PropertyChanged}" >
+            </TextBox>
+
             <Button Name="btn" FocusManager.FocusedElement="{Binding ElementName=Focus}"  Command="{Binding AddClientInfo}" BorderThickness="0" Style="{DynamicResource MetroCircleButtonStyle}"
                 Margin="5,0" >
                 <iconPacks:PackIconEntypo Kind="AddToList" Height="30" Width="30"/>
@@ -65,7 +70,16 @@
                 <DataGridTextColumn IsReadOnly="True"  Header="الصنف" Width="3*"  HeaderStyle="{StaticResource ColumnHeaderStyle}"   Binding="{Binding Category}" />
                 <DataGridTextColumn IsReadOnly="True"  Header="السعر" Width="1*"  HeaderStyle="{StaticResource ColumnHeaderStyle}"   Binding="{Binding Price}" />
                 <DataGridTextColumn IsReadOnly="True"  Header="اللون" Width="1*"  HeaderStyle="{StaticResource ColumnHeaderStyle}"   Binding="{Binding Color}" />
-            
+                <!--<DataGridTextColumn IsReadOnly="True"  Header="ملاحظات" Width="1*"  HeaderStyle="{StaticResource ColumnHeaderStyle}"   Binding="{Binding Notes}" />-->
+                <DataGridTextColumn IsReadOnly="True"  Header="ملاحظات" Width="1*"  HeaderStyle="{StaticResource ColumnHeaderStyle}"   Binding="{Binding Notes}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style>
+                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
                 <DataGridTemplateColumn  Header="حذف" Width="0.5*" HeaderStyle="{StaticResource ColumnHeaderStyle}" >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -78,6 +92,15 @@
                 </DataGridTemplateColumn>
 
             </DataGrid.Columns>
+
+            <DataGrid.Style>
+                <Style BasedOn="{StaticResource MetroDataGrid}"
+                       TargetType="{x:Type DataGrid}">
+                    <Setter Property="AlternatingRowBackground"
+                            Value="{DynamicResource GrayBrush10}" />
+                </Style>
+            </DataGrid.Style>
+
         </DataGrid>
         <StackPanel Margin="0,5"   Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
 

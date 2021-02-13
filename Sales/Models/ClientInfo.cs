@@ -13,7 +13,6 @@ namespace Sales.Models
         }
 
         private int _categoryID;
-        //[Key, Column(Order = 1)]
         public int CategoryID
         {
             get { return _categoryID; }
@@ -21,7 +20,6 @@ namespace Sales.Models
         }
 
         private int _clientID;
-        //[Key, Column(Order = 2)]
         public int ClientID
         {
             get { return _clientID; }
@@ -42,6 +40,13 @@ namespace Sales.Models
         {
             get { return _color; }
             set { SetProperty(ref _color, value); }
+        }
+
+        private string _notes;
+        public string Notes
+        {
+            get { return _notes; }
+            set { SetProperty(ref _notes, value); }
         }
 
         public virtual Client Client { get; set; }
@@ -83,6 +88,13 @@ namespace Sales.Models
         {
             get { return _price; }
             set { SetProperty(ref _price, value); }
+        }
+
+        private string _notes;
+        public string Notes
+        {
+            get { return _notes; }
+            set { SetProperty(ref _notes, value); }
         }
     }
 }

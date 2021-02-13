@@ -9,8 +9,6 @@ namespace Sales.Services
 {
     public class ClientAccountServices
     {
-        ClientServices clientServ = new ClientServices();
-
         public ClientAccount AddAccount(ClientAccount account)
         {
             using (SalesDB db = new SalesDB())
@@ -49,35 +47,11 @@ namespace Sales.Services
             }
         }
 
-        public ClientAccount GetAccount()
+        public ClientAccount GetAccount(int id)
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.ClientsAccounts.Include(i => i.Client).OrderByDescending(o => o.ID).FirstOrDefault();
-            }
-        }
-
-        public int GetClientsAccountsNumer(string key, DateTime dtFrom, DateTime dtTo)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.ClientsAccounts.Include(i => i.Client).Where(w => (w.Statement + w.Client.Name).Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Count();
-            }
-        }
-
-        public decimal? GetTotalDebit(string key, DateTime dtFrom, DateTime dtTo)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.ClientsAccounts.Include(i => i.Client).Where(w => (w.Statement + w.Client.Name).Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Sum(s => s.Debit);
-            }
-        }
-
-        public decimal? GetTotalCredit(string key, DateTime dtFrom, DateTime dtTo)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.ClientsAccounts.Include(i => i.Client).Where(w => (w.Statement + w.Client.Name).Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Sum(s => s.Credit);
+                return db.ClientsAccounts.Include(i => i.Client).SingleOrDefault(s => s.ID == id);
             }
         }
 
@@ -92,56 +66,22 @@ namespace Sales.Services
             }
         }
 
-        public DateTime GetFirstDate(int clientID)
+        public List<ClientAccount> GetClientAccounts(int clientID)
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.ClientsAccounts.Where(w => w.ClientID == clientID).Min(d => d.Date).Date;
+                return db.ClientsAccounts.Where(w => w.ClientID == clientID).OrderByDescending(o => o.RegistrationDate).ToList();
             }
         }
 
-        public DateTime GetLastDate(int clientID)
+        public List<ClientAccount> GetAccounts(DateTime dtFrom, DateTime dtTo)
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.ClientsAccounts.Where(w => w.ClientID == clientID).Max(d => d.Date).Date;
-            }
-        }
-
-        public ClientAccountVM GetAccountInfo(int clientID, DateTime dtFrom, DateTime dtTo)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                var client = clientServ.GetClient(clientID);
-                ClientAccountVM accountVM = new ClientAccountVM();
-                accountVM.TotalCredit = db.ClientsAccounts.Where(w => w.ClientID == clientID && w.Date >= dtFrom && w.Date <= dtTo).Sum(d => d.Credit);
-                if (accountVM.TotalCredit == null)
-                    accountVM.TotalCredit = 0;
-                accountVM.TotalDebit = db.ClientsAccounts.Where(w => w.ClientID == clientID && w.Date >= dtFrom && w.Date <= dtTo).Sum(d => d.Debit);
-                if (accountVM.TotalDebit == null)
-                    accountVM.TotalDebit = 0;
-                accountVM.DuringAccount = accountVM.TotalCredit - accountVM.TotalDebit;
-                accountVM.CurrentAccount = client.AccountStart + db.ClientsAccounts.Where(w => w.ClientID == clientID).Sum(d => d.Credit) - db.ClientsAccounts.Where(w => w.ClientID == clientID).Sum(d => d.Debit);
-                accountVM.OldAccount = accountVM.CurrentAccount - accountVM.DuringAccount;
-                return accountVM;
-            }
-        }
-
-        public List<ClientAccount> GetClientAccounts(int clientID, DateTime dtFrom, DateTime dtTo)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.ClientsAccounts.Where(w => w.ClientID == clientID && w.Date >= dtFrom && w.Date <= dtTo).OrderByDescending(o => o.RegistrationDate).ToList();
-            }
-        }
-
-        public List<ClientAccount> SearchClientsAccounts(string search, int page, DateTime dtFrom, DateTime dtTo)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.ClientsAccounts.Include(i => i.Client).Where(w => (w.Statement + w.Client.Name).Contains(search) && w.Date >= dtFrom && w.Date <= dtTo).OrderByDescending(o => o.RegistrationDate).Skip((page - 1) * 17).Take(17).ToList();
+                return db.ClientsAccounts.Include(i => i.Client).Where(w => w.Date >= dtFrom && w.Date <= dtTo).OrderByDescending(o => o.RegistrationDate).ToList();
             }
         }
     }
 }
+
 

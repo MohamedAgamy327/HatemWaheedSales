@@ -140,12 +140,6 @@
                                     <iconPacks:PackIconMaterial Kind="DeleteForever" />
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource MetroCircleButtonStyle}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ClientAccounts.Count, Converter={StaticResource GreaterThanConverter}}" Value="1"  >
-                                                    <Setter Property="IsEnabled" Value="False"></Setter>
-                                                </DataTrigger>
-                                             
-                                            </Style.Triggers>
                                         </Style>
                                     </Button.Style>
                                 </Button>

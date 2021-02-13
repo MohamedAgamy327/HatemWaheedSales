@@ -52,6 +52,14 @@ namespace Sales.Services
             }
         }
 
+        public bool IsExistInClientInfo (int id)
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.ClientsInfo.Any(s => s.CategoryID == id);
+            }
+        }
+
         public DateTime GetFirstDate(int id)
         {
             using (SalesDB db = new SalesDB())
@@ -215,19 +223,6 @@ namespace Sales.Services
         }
 
 
-
-        public List<CategoryVM> GetAllCategories()
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Categories.Include(s => s.Company).OrderBy(o => o.Name).Select(k => new CategoryVM
-                {
-                    Category = k.Name + " " + k.Company.Name,
-                    ID = k.ID,
-                    Color = k.Color
-                }).ToList();
-            }
-        }
         public int GetAllCategoriesNumer(string key)
         {
             using (SalesDB db = new SalesDB())

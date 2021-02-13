@@ -11,7 +11,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 
-
 namespace Sales.ViewModels.StoreViewModels
 {
     public class CategoryViewModel : ValidatableBindableBase
@@ -270,7 +269,7 @@ namespace Sales.ViewModels.StoreViewModels
             });
             if (result == MessageDialogResult.Affirmative)
             {
-                if (_categoryServ.IsExistInSupplies(_selectedCategory.ID) || _categoryServ.IsExistInSales(_selectedCategory.ID))
+                if (_categoryServ.IsExistInSupplies(_selectedCategory.ID) || _categoryServ.IsExistInSales(_selectedCategory.ID) || _categoryServ.IsExistInClientInfo(_selectedCategory.ID))
                 {
                     await _currentWindow.ShowMessageAsync("فشل الحذف", "لا يمكن حذف هذا الصنف", MessageDialogStyle.Affirmative, new MetroDialogSettings()
                     {
@@ -457,10 +456,9 @@ namespace Sales.ViewModels.StoreViewModels
 
         }
 
-
         private void GetCurrentPage()
         {
-            Categories = new ObservableCollection<Category>(categories.Where(w => (w.Name + w.Company.Name + w.Stock.Name).Contains(_key)).OrderBy(o => o.Company.Name).ThenBy(o => o.Name).Skip((_currentPage - 1) * 17).Take(17));
+            Categories = new ObservableCollection<Category>(categories.Where(w => (w.Name + w.Company + w.Stock.Name).Contains(_key)).OrderBy(o => o.Company.Name).ThenBy(o => o.Name).Skip((_currentPage - 1) * 17).Take(17));
         }
 
     }

@@ -24,6 +24,9 @@ namespace Sales.ViewModels.ClientViewModels
         private readonly ClientUpdateDialog _clientUpdateDialog;
         private readonly ClientAccountShowDialog _clientAccountShowDialog;
 
+        List<Client> clients;
+        List<ClientAccount> clientAccounts;
+
         ClientServices _clientServ;
         CategoryServices _categoryServ;
         ClientInfoServices _clientInfoServ;
@@ -33,15 +36,15 @@ namespace Sales.ViewModels.ClientViewModels
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _clientServ.GetClientsNumer(Key);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_clientServ.GetClientsNumer(_key) / 17));
+            TotalRecords = clients.Where(w => (w.Name + w.Address + w.Telephone).Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            Clients = new ObservableCollection<Client>(_clientServ.SearchClients(_key, _currentPage));
+            GetCurrentPage();
         }
 
         public ClientDisplayViewModel()
@@ -58,9 +61,10 @@ namespace Sales.ViewModels.ClientViewModels
             _key = "";
             _isFocused = true;
             _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
+            clients = _clientServ.GetClients();
+            _namesSuggestions = clients.Select(s => s.Name).Distinct().ToList();
+            _addressSuggestions = clients.Select(s => s.Address).Distinct().ToList();
             _categories = new ObservableCollection<CategoryVM>(_categoryServ.GetActiveCategories());
-            _namesSuggestions = _clientServ.GetNamesSuggetions();
-            _addressSuggestions = _clientServ.GetAddressSuggetions();
             Load();
         }
 
@@ -201,7 +205,7 @@ namespace Sales.ViewModels.ClientViewModels
             set { SetProperty(ref _selectedCategory, value); }
         }
 
-        private List<string> _namesSuggestions ;
+        private List<string> _namesSuggestions;
         public List<string> NamesSuggestions
         {
             get { return _namesSuggestions; }
@@ -279,7 +283,7 @@ namespace Sales.ViewModels.ClientViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            Clients = new ObservableCollection<Client>(_clientServ.SearchClients(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -297,7 +301,7 @@ namespace Sales.ViewModels.ClientViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            Clients = new ObservableCollection<Client>(_clientServ.SearchClients(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _delete;
@@ -320,8 +324,19 @@ namespace Sales.ViewModels.ClientViewModels
             });
             if (result == MessageDialogResult.Affirmative)
             {
+                if (_clientServ.IsExistInClientAccounts(_selectedClient.ID) || _clientServ.IsExistInClientInfo(_selectedClient.ID) || _clientServ.IsExistInSales(_selectedClient.ID) || _clientServ.IsExistInSupplies(_selectedClient.ID))
+                {
+                    await _currentWindow.ShowMessageAsync("فشل الحذف", "لا يمكن حذف هذا العميل", MessageDialogStyle.Affirmative, new MetroDialogSettings()
+                    {
+                        AffirmativeButtonText = "موافق",
+                        DialogMessageFontSize = 25,
+                        DialogTitleFontSize = 30
+                    });
+                    return;
+                }
                 _clientServ.DeleteClient(_selectedClient);
-                Load();
+                clients.Remove(_selectedClient);
+                GetCurrentPage();
             }
         }
 
@@ -377,6 +392,7 @@ namespace Sales.ViewModels.ClientViewModels
                 _clientServ.AddClient(_newClient);
                 _namesSuggestions.Add(_newClient.Name);
                 _addressSuggestions.Add(_newClient.Address);
+                clients.Add(_newClient);
                 NewClient = new Client();
                 AccountStart = null;
                 await _currentWindow.ShowMessageAsync("نجاح الإضافة", "تم الإضافة بنجاح", MessageDialogStyle.Affirmative, new MetroDialogSettings()
@@ -405,8 +421,20 @@ namespace Sales.ViewModels.ClientViewModels
         }
         private async void ShowAccountMethod()
         {
-            DateFrom = _accountServ.GetFirstDate(_selectedClient.ID);
-            DateTo = _accountServ.GetLastDate(_selectedClient.ID);
+            if (!_clientServ.IsExistInClientAccounts(_selectedClient.ID))
+            {
+                await _currentWindow.ShowMessageAsync("الحساب", "لا يوجد حساب لهذا العميل", MessageDialogStyle.Affirmative, new MetroDialogSettings()
+                {
+                    AffirmativeButtonText = "موافق",
+                    DialogMessageFontSize = 25,
+                    DialogTitleFontSize = 30
+                });
+                return;
+            }
+            clientAccounts = _accountServ.GetClientAccounts(_selectedClient.ID);
+            DateFrom = clientAccounts.Min(m=>m.Date).Date;
+            DateTo = clientAccounts.Max(m=>m.Date).Date;
+           
             GetClientAccountsMethod();
             _clientAccountShowDialog.DataContext = this;
             await _currentWindow.ShowMetroDialogAsync(_clientAccountShowDialog);
@@ -423,8 +451,17 @@ namespace Sales.ViewModels.ClientViewModels
         }
         private void GetClientAccountsMethod()
         {
-            SelectedClientAccount = _accountServ.GetAccountInfo(_selectedClient.ID, _dateFrom, _dateTo);
-            ClientAccounts = new ObservableCollection<ClientAccount>(_accountServ.GetClientAccounts(_selectedClient.ID, _dateFrom, _dateTo));
+            SelectedClientAccount = new ClientAccountVM();
+            SelectedClientAccount.TotalCredit = clientAccounts.Where(w => w.ClientID == _selectedClient.ID && w.Date >= _dateFrom && w.Date <= _dateTo).Sum(d => d.Credit);
+            if (SelectedClientAccount.TotalCredit == null)
+                SelectedClientAccount.TotalCredit = 0;
+            SelectedClientAccount.TotalDebit = clientAccounts.Where(w => w.ClientID == _selectedClient.ID && w.Date >= _dateFrom && w.Date <= _dateTo).Sum(d => d.Debit);
+            if (SelectedClientAccount.TotalDebit == null)
+                SelectedClientAccount.TotalDebit = 0;
+            SelectedClientAccount.DuringAccount = SelectedClientAccount.TotalCredit - SelectedClientAccount.TotalDebit;
+            SelectedClientAccount.CurrentAccount = _selectedClient.AccountStart + clientAccounts.Where(w => w.ClientID == _selectedClient.ID).Sum(d => d.Credit) - clientAccounts.Where(w => w.ClientID == _selectedClient.ID).Sum(d => d.Debit);
+            SelectedClientAccount.OldAccount = SelectedClientAccount.CurrentAccount - SelectedClientAccount.DuringAccount;
+            ClientAccounts = new ObservableCollection<ClientAccount>(clientAccounts.Where(w => w.ClientID == _selectedClient.ID && w.Date >= _dateFrom && w.Date <= _dateTo).OrderByDescending(o => o.RegistrationDate).ToList());
         }
 
         private RelayCommand _print;
@@ -493,10 +530,7 @@ namespace Sales.ViewModels.ClientViewModels
         }
         private async void ShowUpdateMethod()
         {
-            if (_selectedClient.ClientAccounts.Count > 0)
-                CanEdit = false;
-            else
-                CanEdit = true;
+            CanEdit = !(_clientServ.IsExistInClientAccounts(_selectedClient.ID));
             AccountStart = Math.Abs(Convert.ToDecimal(_selectedClient.AccountStart));
             if (_selectedClient.AccountStart > 0)
                 AccountStartType = true;
@@ -577,16 +611,6 @@ namespace Sales.ViewModels.ClientViewModels
             {
                 if (SelectedCategory == null)
                     return;
-                //if (_clientInfoServ.GetClientInfo(_selectedClient.ID, _selectedCategory.ID) != null)
-                //{
-                //    MessageDialogResult result = await _currentWindow.ShowMessageAsync("خطأ", "هذا الصنف موجود مسبقاً ", MessageDialogStyle.Affirmative, new MetroDialogSettings()
-                //    {
-                //        AffirmativeButtonText = "موافق",
-                //        DialogMessageFontSize = 25,
-                //        DialogTitleFontSize = 30
-                //    });
-                //    return;
-                //}
                 _newClientInfo.ClientID = _selectedClient.ID;
                 _clientInfoServ.AddClientInfo(_newClientInfo);
                 ClientCategories = new ObservableCollection<ClientInfoVM>(_clientInfoServ.GetClientInfoCategories(_selectedClient.ID));
@@ -596,7 +620,7 @@ namespace Sales.ViewModels.ClientViewModels
             {
                 MessageBox.Show(ex.ToString());
             }
-         
+
         }
         private bool CanExecuteAddClientInfo()
         {
@@ -616,7 +640,7 @@ namespace Sales.ViewModels.ClientViewModels
         {
             try
             {
-                MessageDialogResult result = await _currentWindow.ShowMessageAsync("تأكيد الحذف", "هل تـريــد حــذف هـذا ؟", MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings()
+                MessageDialogResult result = await _currentWindow.ShowMessageAsync("تأكيد الحذف", "هل تـريــد حــذف هـذا الصنف؟", MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings()
                 {
                     AffirmativeButtonText = "موافق",
                     NegativeButtonText = "الغاء",
@@ -626,13 +650,13 @@ namespace Sales.ViewModels.ClientViewModels
                 if (result == MessageDialogResult.Affirmative)
                 {
                     _clientInfoServ.DeleteClientInfo(_selectedClientCategory.ClientID, _selectedClientCategory.CategoryID);
-                    ClientCategories = new ObservableCollection<ClientInfoVM>(_clientInfoServ.GetClientInfoCategories(_selectedClient.ID));
+                    ClientCategories.Remove(ClientCategories.SingleOrDefault(s => s.CategoryID == _selectedClientCategory.CategoryID));
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
-            }          
+            }
         }
 
         private RelayCommand<string> _closeDialog;
@@ -657,7 +681,6 @@ namespace Sales.ViewModels.ClientViewModels
                     break;
                 case "Update":
                     await _currentWindow.HideMetroDialogAsync(_clientUpdateDialog);
-                    Load();
                     break;
                 case "AccountShow":
                     await _currentWindow.HideMetroDialogAsync(_clientAccountShowDialog);
@@ -667,5 +690,12 @@ namespace Sales.ViewModels.ClientViewModels
             }
 
         }
+
+
+        private void GetCurrentPage()
+        {
+            Clients = new ObservableCollection<Client>(clients.Where(w => (w.Name + w.Address + w.Telephone).Contains(_key)).OrderBy(o => o.Name).Skip((_currentPage - 1) * 17).Take(17));
+        }
+
     }
 }
