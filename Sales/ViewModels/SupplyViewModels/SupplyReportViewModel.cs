@@ -16,7 +16,7 @@ namespace Sales.ViewModels.SupplyViewModels
             CurrentPage = 1;
             ISFirst = false;
             TotalRecords = _supplyServ.GetSuppliesNumer(Key, _dateFrom, _dateTo);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_supplyServ.GetSuppliesNumer(_key, _dateFrom, _dateTo) / 17));
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)22 / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)

@@ -9,6 +9,7 @@ using MahApps.Metro.Controls.Dialogs;
 using MahApps.Metro.Controls;
 using System.Windows;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Sales.ViewModels.SupplyViewModels
 {
@@ -16,29 +17,31 @@ namespace Sales.ViewModels.SupplyViewModels
     {
         MetroWindow _currentWindow;
 
+        List<Supply> supplies;
+
         SafeServices _safeServ;
         SupplyServices _supplyServ;
-        CategoryServices _categoryServ ;
-        ClientAccountServices _clientAccountServ ;
+        CategoryServices _categoryServ;
+        ClientAccountServices _clientAccountServ;
         SupplyCategoryServices _supplyCategoryServ;
 
         private void Load()
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _supplyServ.GetSuppliesNumer(Key);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_supplyServ.GetSuppliesNumer(_key) / 17));
+            TotalRecords = supplies.Where(w => (w.ID.ToString() + w.Client.Name).Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            Supplies = new ObservableCollection<Supply>(_supplyServ.SearchSupplies(_key, _currentPage));
+            GetCurrentPage();
         }
 
         public SupplyDisplayViewModel()
-        {      
+        {
             _safeServ = new SafeServices();
             _supplyServ = new SupplyServices();
             _categoryServ = new CategoryServices();
@@ -48,11 +51,12 @@ namespace Sales.ViewModels.SupplyViewModels
             _key = "";
             _isFocused = true;
             _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
+            supplies = _supplyServ.GetSupplies();
             Load();
-            
+
         }
 
-        private bool _isFocused ;
+        private bool _isFocused;
         public bool IsFocused
         {
             get { return _isFocused; }
@@ -156,7 +160,7 @@ namespace Sales.ViewModels.SupplyViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            Supplies = new ObservableCollection<Supply>(_supplyServ.SearchSupplies(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -174,7 +178,7 @@ namespace Sales.ViewModels.SupplyViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            Supplies = new ObservableCollection<Supply>(_supplyServ.SearchSupplies(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _delete;
@@ -197,6 +201,17 @@ namespace Sales.ViewModels.SupplyViewModels
             });
             if (result == MessageDialogResult.Affirmative)
             {
+                if (_supplyServ.IsExistInRecalls(_selectedSupply.ID) || ! _supplyServ.IsLastSupply(_selectedSupply.ID))
+                {
+                    await _currentWindow.ShowMessageAsync("فشل الحذف", "لا يمكن حذف هذه الفاتورة", MessageDialogStyle.Affirmative, new MetroDialogSettings()
+                    {
+                        AffirmativeButtonText = "موافق",
+                        DialogMessageFontSize = 25,
+                        DialogTitleFontSize = 30
+                    });
+                    return;
+                }
+
                 _safeServ.DeleteSafe(_selectedSupply.RegistrationDate);
                 _clientAccountServ.DeleteAccount(_selectedSupply.RegistrationDate);
                 var supplyCategories = _supplyCategoryServ.GetSupplyCategories(_selectedSupply.ID);
@@ -209,6 +224,7 @@ namespace Sales.ViewModels.SupplyViewModels
                     _categoryServ.UpdateCategory(cat);
                 }
                 _supplyServ.DeleteSupply(_selectedSupply);
+                supplies.Remove(_selectedSupply);
                 Load();
             }
         }
@@ -224,8 +240,19 @@ namespace Sales.ViewModels.SupplyViewModels
                     ?? (_edit = new RelayCommand(EditMethod));
             }
         }
-        private void EditMethod()
+        private async void EditMethod()
         {
+            if (_supplyServ.IsExistInRecalls(_selectedSupply.ID) || !_supplyServ.IsLastSupply(_selectedSupply.ID))
+            {
+                await _currentWindow.ShowMessageAsync("فشل التعديل", "لا يمكن تعديل هذه الفاتورة", MessageDialogStyle.Affirmative, new MetroDialogSettings()
+                {
+                    AffirmativeButtonText = "موافق",
+                    DialogMessageFontSize = 25,
+                    DialogTitleFontSize = 30
+                });
+                return;
+            }
+
             SupplyUpdateViewModel.ID = _selectedSupply.ID;
             _currentWindow.Hide();
             new SupplyUpdateWindow().ShowDialog();
@@ -270,6 +297,12 @@ namespace Sales.ViewModels.SupplyViewModels
             new SupplyShowWindow().ShowDialog();
             Load();
             _currentWindow.ShowDialog();
+        }
+
+
+        private void GetCurrentPage()
+        {
+            Supplies = new ObservableCollection<Supply>(supplies.Where(w => (w.ID.ToString() + w.Client.Name).Contains(_key)).OrderByDescending(o => o.RegistrationDate).Skip((_currentPage - 1) * 17).Take(17));
         }
 
     }

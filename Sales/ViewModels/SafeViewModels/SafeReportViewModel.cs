@@ -27,7 +27,7 @@ namespace Sales.ViewModels.SafeViewModels
             CurrentPage = 1;
             ISFirst = false;
             TotalRecords = safes.Where(w => (w.Statement).Contains(_key)).Count();
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)

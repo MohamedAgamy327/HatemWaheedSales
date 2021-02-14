@@ -15,7 +15,7 @@ namespace Sales.Helpers
 
             var category = categoryServ.GetCategory(id);
 
-            if ( category.Qty >category.RequestLimit)
+            if (category.Qty > category.RequestLimit)
                 return 1;
             else
                 return 0;

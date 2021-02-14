@@ -20,7 +20,7 @@ namespace Sales.Helpers
             PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
 #pragma warning disable CS0108 // Member hides inherited member; missing new keyword
-        public event PropertyChangedEventHandler  PropertyChanged =  delegate { };
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
 #pragma warning restore CS0108 // Member hides inherited member; missing new keyword
 
     }

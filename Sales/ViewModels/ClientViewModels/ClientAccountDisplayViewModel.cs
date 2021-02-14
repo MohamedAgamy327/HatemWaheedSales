@@ -24,13 +24,13 @@ namespace Sales.ViewModels.ClientViewModels
         SafeServices _safeServ;
         ClientServices _clientServ;
         ClientAccountServices _clientAccountServ;
-       
+
         private void Load()
         {
             CurrentPage = 1;
             ISFirst = false;
             TotalRecords = clientAccounts.Where(w => (w.Statement + w.Client.Name).Contains(_key)).Count();
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
