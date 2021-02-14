@@ -256,6 +256,7 @@ namespace Sales.ViewModels.SupplyViewModels
             SupplyUpdateViewModel.ID = _selectedSupply.ID;
             _currentWindow.Hide();
             new SupplyUpdateWindow().ShowDialog();
+            supplies = _supplyServ.GetSupplies();
             Load();
             _currentWindow.ShowDialog();
         }
@@ -275,6 +276,7 @@ namespace Sales.ViewModels.SupplyViewModels
         {
             _currentWindow.Hide();
             new SupplyAddWindow().ShowDialog();
+            supplies = _supplyServ.GetSupplies();
             Load();
             _currentWindow.ShowDialog();
         }
@@ -295,6 +297,7 @@ namespace Sales.ViewModels.SupplyViewModels
             SupplyShowViewModel.ID = _selectedSupply.ID;
             _currentWindow.Hide();
             new SupplyShowWindow().ShowDialog();
+            supplies = _supplyServ.GetSupplies();
             Load();
             _currentWindow.ShowDialog();
         }

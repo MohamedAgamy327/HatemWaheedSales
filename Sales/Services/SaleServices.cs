@@ -3,11 +3,37 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data.Entity;
+using Sales.ViewModels;
 
 namespace Sales.Services
 {
     public class SaleServices
     {
+        public List<Sale> GetSales()
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.Sales.Where(w => w.RegistrationDate.Year == MainViewModel.Year).Include(i => i.Client).Include(i => i.Salesperson).OrderByDescending(o => o.RegistrationDate).ToList();
+            }
+        }
+
+        public bool IsExistInRecalls(int id)
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.SalesRecalls.Any(s => s.SaleID == id);
+            }
+        }
+
+        public bool IsLastSale(int id)
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                int clientID = db.Sales.FirstOrDefault(d => d.ID == id).ClientID;
+                return id == db.Sales.Where(s => s.ClientID == clientID).OrderByDescending(d => d.RegistrationDate).FirstOrDefault().ID;
+            }
+        }
+
         public void AddSale(Sale sale)
         {
             using (SalesDB db = new SalesDB())
@@ -44,13 +70,13 @@ namespace Sales.Services
             }
         }
        
-        public int GetSalesNumer(string key)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Sales.Include(i => i.Client).Include(i => i.Salesperson).Where(w => (w.ID.ToString() + w.Client.Name + w.Salesperson.Name).Contains(key)).Count();
-            }
-        }
+        //public int GetSalesNumer(string key)
+        //{
+        //    using (SalesDB db = new SalesDB())
+        //    {
+        //        return db.Sales.Include(i => i.Client).Include(i => i.Salesperson).Where(w => (w.ID.ToString() + w.Client.Name + w.Salesperson.Name).Contains(key)).Count();
+        //    }
+        //}
 
         public int GetSalesNumer(string key, DateTime dtFrom, DateTime dtTo)
         {
@@ -92,15 +118,6 @@ namespace Sales.Services
             }
         }
 
-        public bool IsLastSale(int id)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                int clientID = db.Sales.FirstOrDefault(d => d.ID == id).ClientID;
-                return id == db.Sales.AsEnumerable().Where(s => s.ClientID == clientID).LastOrDefault().ID;
-            }
-        }
-
         public DateTime GetFirstDate(int salespersonID)
         {
             using (SalesDB db = new SalesDB())
@@ -125,13 +142,13 @@ namespace Sales.Services
             }
         }
 
-        public List<Sale> SearchSales(string key, int page)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Sales.Include(i => i.Client).Include(i => i.Salesperson).Where(w => (w.ID.ToString() + w.Client.Name + w.Salesperson.Name).Contains(key)).OrderByDescending(o => o.RegistrationDate).Skip((page - 1) * 17).Take(17).Include(i=>i.SaleRecalls).ToList();
-            }
-        }
+        //public List<Sale> SearchSales(string key, int page)
+        //{
+        //    using (SalesDB db = new SalesDB())
+        //    {
+        //        return db.Sales.Include(i => i.Client).Include(i => i.Salesperson).Where(w => (w.ID.ToString() + w.Client.Name + w.Salesperson.Name).Contains(key)).OrderByDescending(o => o.RegistrationDate).Skip((page - 1) * 17).Take(17).Include(i=>i.SaleRecalls).ToList();
+        //    }
+        //}
 
         public List<Sale> SearchSales(string key, int page, DateTime dtFrom, DateTime dtTo)
         {

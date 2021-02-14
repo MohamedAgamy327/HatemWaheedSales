@@ -34,6 +34,7 @@ namespace Sales.Services
             }
         }
 
+
         public void AddSupply(Supply supply)
         {
             using (SalesDB db = new SalesDB())

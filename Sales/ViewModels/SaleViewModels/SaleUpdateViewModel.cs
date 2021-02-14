@@ -260,7 +260,7 @@ namespace Sales.ViewModels.SaleViewModels
         {
             try
             {
-                return !NewSaleCategory.HasErrors;
+                return NewSaleCategory != null ? !NewSaleCategory.HasErrors : false;
             }
             catch
             {

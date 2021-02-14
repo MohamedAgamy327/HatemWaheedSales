@@ -6,6 +6,7 @@ using Sales.Models;
 using Sales.Services;
 using Sales.Views.SaleViews;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -15,6 +16,8 @@ namespace Sales.ViewModels.SaleViewModels
     public class SaleDisplayViewModel : ValidatableBindableBase
     {
         MetroWindow _currentWindow;
+
+        List<Sale> sales;
 
         SaleServices _saleServ;
         SafeServices _safeServ;
@@ -26,15 +29,15 @@ namespace Sales.ViewModels.SaleViewModels
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _saleServ.GetSalesNumer(Key);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_saleServ.GetSalesNumer(_key) / 17));
+            TotalRecords = sales.Where(w => (w.ID.ToString() + w.Client.Name + w.Salesperson.Name).Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            Sales = new ObservableCollection<Sale>(_saleServ.SearchSales(_key, _currentPage));
+            GetCurrentPage();
         }
 
         public SaleDisplayViewModel()
@@ -48,6 +51,7 @@ namespace Sales.ViewModels.SaleViewModels
             _key = "";
             _isFocused = true;
             _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
+            sales = _saleServ.GetSales();
             Load();
         }
 
@@ -148,7 +152,7 @@ namespace Sales.ViewModels.SaleViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            Sales = new ObservableCollection<Sale>(_saleServ.SearchSales(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -166,7 +170,7 @@ namespace Sales.ViewModels.SaleViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            Sales = new ObservableCollection<Sale>(_saleServ.SearchSales(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _edit;
@@ -178,8 +182,19 @@ namespace Sales.ViewModels.SaleViewModels
                     ?? (_edit = new RelayCommand(EditMethod));
             }
         }
-        private void EditMethod()
+        private async void EditMethod()
         {
+            if (_saleServ.IsExistInRecalls(_selectedSale.ID) || !_saleServ.IsLastSale(_selectedSale.ID))
+            {
+                await _currentWindow.ShowMessageAsync("فشل التعديل", "لا يمكن تعديل هذه الفاتورة", MessageDialogStyle.Affirmative, new MetroDialogSettings()
+                {
+                    AffirmativeButtonText = "موافق",
+                    DialogMessageFontSize = 25,
+                    DialogTitleFontSize = 30
+                });
+                return;
+            }
+
             SaleUpdateViewModel.ID = _selectedSale.ID;
             _currentWindow.Hide();
             new SaleUpdateWindow().ShowDialog();
@@ -207,6 +222,18 @@ namespace Sales.ViewModels.SaleViewModels
             });
             if (result == MessageDialogResult.Affirmative)
             {
+
+                if (_saleServ.IsExistInRecalls(_selectedSale.ID) || !_saleServ.IsLastSale(_selectedSale.ID))
+                {
+                    await _currentWindow.ShowMessageAsync("فشل الحذف", "لا يمكن حذف هذه الفاتورة", MessageDialogStyle.Affirmative, new MetroDialogSettings()
+                    {
+                        AffirmativeButtonText = "موافق",
+                        DialogMessageFontSize = 25,
+                        DialogTitleFontSize = 30
+                    });
+                    return;
+                }
+
                 _safeServ.DeleteSafe(_selectedSale.RegistrationDate);
                 _clientAccountServ.DeleteAccount(_selectedSale.RegistrationDate);
                 var saleCategories = _saleCategoryServ.GetSaleCategories(_selectedSale.ID);
@@ -219,6 +246,7 @@ namespace Sales.ViewModels.SaleViewModels
                     _categoryServ.UpdateCategory(cat);
                 }
                 _saleServ.DeleteSale(_selectedSale);
+                sales.Remove(_selectedSale);
                 Load();
             }
         }
@@ -238,6 +266,7 @@ namespace Sales.ViewModels.SaleViewModels
         {
             _currentWindow.Hide();
             new SaleAddWindow().ShowDialog();
+            sales = _saleServ.GetSales();
             Load();
             _currentWindow.ShowDialog();
         }
@@ -258,8 +287,16 @@ namespace Sales.ViewModels.SaleViewModels
             SaleShowViewModel.ID = _selectedSale.ID;
             _currentWindow.Hide();
             new SaleShowWindow().ShowDialog();
+            sales = _saleServ.GetSales();
             Load();
             _currentWindow.ShowDialog();
         }
+
+        private void GetCurrentPage()
+        {
+            Sales = new ObservableCollection<Sale>(sales.Where(w => (w.ID.ToString() + w.Client.Name + w.Salesperson.Name).Contains(_key)).OrderByDescending(o => o.RegistrationDate).Skip((_currentPage - 1) * 17).Take(17));
+        }
+
+
     }
 }
