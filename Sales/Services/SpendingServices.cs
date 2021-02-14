@@ -68,30 +68,5 @@ namespace Sales.Services
         }
 
 
-        //public int GetSpendingsNumer(string key)
-        //{
-        //    using (SalesDB db = new SalesDB())
-        //    {
-        //        return db.Spendings.Where(w => w.Statement.Contains(key)).Count();
-        //    }
-        //}
-
-        //public int GetSpendingsNumer(string key, DateTime dtFrom, DateTime dtTo)
-        //{
-        //    using (SalesDB db = new SalesDB())
-        //    {
-        //        return db.Spendings.Where(w => w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Count();
-        //    }
-        //}
-
-        //public decimal? GetTotalAmount(string key, DateTime dtFrom, DateTime dtTo)
-        //{
-        //    using (SalesDB db = new SalesDB())
-        //    {
-        //        return db.Spendings.Where(w => w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Sum(s => s.Amount);
-        //    }
-        //}
-
-
     }
 }

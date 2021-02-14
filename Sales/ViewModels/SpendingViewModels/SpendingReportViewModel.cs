@@ -3,28 +3,31 @@ using Sales.Helpers;
 using Sales.Models;
 using Sales.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Sales.ViewModels.SpendingViewModels
 {
     public class SpendingReportViewModel : ValidatableBindableBase
     {
         SpendingServices _spendingServ;
+        List<Spending> spendings;
 
         private void Load()
         {
             CurrentPage = 1;
             ISFirst = false;
-         //   TotalRecords = _spendingServ.GetSpendingsNumer(Key, _dateFrom, _dateTo);
-         //   LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_spendingServ.GetSpendingsNumer(_key, _dateFrom, _dateTo) / 17));
+            TotalRecords = spendings.Where(w => (w.Statement).Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-          //  TotalAmount = _spendingServ.GetTotalAmount(_key, _dateFrom, _dateTo);
-           // Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage, _dateFrom, _dateTo));
+            TotalAmount = spendings.Where(w => w.Statement.Contains(_key)).Sum(s => s.Amount);
+            GetCurrentPage();
         }
 
         public SpendingReportViewModel()
@@ -34,10 +37,11 @@ namespace Sales.ViewModels.SpendingViewModels
             _isFocused = true;
             _dateFrom = Convert.ToDateTime(DateTime.Now.ToShortDateString());
             _dateTo = Convert.ToDateTime(DateTime.Now.ToShortDateString());
+            spendings = _spendingServ.GetSpendings(_dateFrom, _dateTo);
             Load();
         }
 
-        private bool _isFocused ;
+        private bool _isFocused;
         public bool IsFocused
         {
             get { return _isFocused; }
@@ -86,7 +90,7 @@ namespace Sales.ViewModels.SpendingViewModels
             set { SetProperty(ref _totalAmount, value); }
         }
 
-        private string _key ;
+        private string _key;
         public string Key
         {
             get { return _key; }
@@ -131,6 +135,21 @@ namespace Sales.ViewModels.SpendingViewModels
             Load();
         }
 
+        private RelayCommand _searcByDate;
+        public RelayCommand SearchByDate
+        {
+            get
+            {
+                return _searcByDate
+                    ?? (_searcByDate = new RelayCommand(SearchByDateMethod));
+            }
+        }
+        private void SearchByDateMethod()
+        {
+            spendings = _spendingServ.GetSpendings(_dateFrom, _dateTo);
+            Load();
+        }
+
         private RelayCommand _next;
         public RelayCommand Next
         {
@@ -146,7 +165,7 @@ namespace Sales.ViewModels.SpendingViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-           // Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage, _dateFrom, _dateTo));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -164,7 +183,12 @@ namespace Sales.ViewModels.SpendingViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-          //  Spendings = new ObservableCollection<Spending>(_spendingServ.SearchSpendings(_key, _currentPage, _dateFrom, _dateTo));
+            GetCurrentPage();
+        }
+
+        private void GetCurrentPage()
+        {
+            Spendings = new ObservableCollection<Spending>(spendings.Where(w => w.Statement.Contains(_key)).OrderByDescending(o => o.RegistrationDate).Skip((_currentPage - 1) * 17).Take(17));
         }
 
     }
