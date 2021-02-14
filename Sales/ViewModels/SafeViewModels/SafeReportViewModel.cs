@@ -6,6 +6,7 @@ using Sales.Models;
 using Sales.Services;
 using Sales.Views.SafeViews;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -16,23 +17,26 @@ namespace Sales.ViewModels.SafeViewModels
     {
         MetroWindow _currentWindow;
         SafeServices _safeServ;
+
+        List<Safe> safes;
+
         private readonly SafeDetailsDialog _safeDetailsDialog;
 
         private void Load()
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _safeServ.GetSafesNumer(Key, _dateFrom, _dateTo);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_safeServ.GetSafesNumer(_key, _dateFrom, _dateTo) / 17));
+            TotalRecords = safes.Where(w => (w.Statement).Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            TotalIncome = _safeServ.GetTotalIncome(_key, _dateFrom, _dateTo);
-            TotalOutgoings = _safeServ.GetTotalOutgoings(_key, _dateFrom, _dateTo);
-            Safes = new ObservableCollection<Safe>(_safeServ.SearchSafes(_key, _currentPage, _dateFrom, _dateTo));
+            TotalIncome = safes.Where(w => w.Amount > 0 && w.Statement.Contains(_key)).Sum(s => s.Amount); 
+            TotalOutgoings = safes.Where(w => w.Amount < 0 && w.Statement.Contains(_key)).Sum(s => s.Amount);
+            GetCurrentPage();
         }
 
         public SafeReportViewModel()
@@ -47,6 +51,7 @@ namespace Sales.ViewModels.SafeViewModels
             _dateFrom = Convert.ToDateTime(DateTime.Now.ToShortDateString());
             _dateTo = Convert.ToDateTime(DateTime.Now.ToShortDateString());
             _currentAccount = _safeServ.GetCurrentAccount();
+            safes = _safeServ.GetSafes(_dateFrom, _dateTo);
             Load();
         }
 
@@ -238,6 +243,21 @@ namespace Sales.ViewModels.SafeViewModels
             Load();
         }
 
+        private RelayCommand _searcByDate;
+        public RelayCommand SearchByDate
+        {
+            get
+            {
+                return _searcByDate
+                    ?? (_searcByDate = new RelayCommand(SearchByDateMethod));
+            }
+        }
+        private void SearchByDateMethod()
+        {
+            safes = _safeServ.GetSafes(_dateFrom, _dateTo);
+            Load();
+        }
+
         private RelayCommand _next;
         public RelayCommand Next
         {
@@ -253,7 +273,7 @@ namespace Sales.ViewModels.SafeViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            Safes = new ObservableCollection<Safe>(_safeServ.SearchSafes(_key, _currentPage, _dateFrom, _dateTo));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -271,7 +291,7 @@ namespace Sales.ViewModels.SafeViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            Safes = new ObservableCollection<Safe>(_safeServ.SearchSafes(_key, _currentPage, _dateFrom, _dateTo));
+            GetCurrentPage();
         }
 
         //Report
@@ -287,15 +307,15 @@ namespace Sales.ViewModels.SafeViewModels
         }
         private async void ShowDetailsMethod()
         {
-            SafeItem = _safeServ.GetItemSum(_key, _dateFrom, _dateTo, 1);
-            SpendingItem = _safeServ.GetItemSum(_key, _dateFrom, _dateTo, 2);
-            SupplyItem = _safeServ.GetItemSum(_key, _dateFrom, _dateTo, 3);
-            SaleItem = _safeServ.GetItemSum(_key, _dateFrom, _dateTo, 4);
-            AccountPayItem = _safeServ.GetItemSum(_key, _dateFrom, _dateTo, 5);
-            AccountCatchItem = _safeServ.GetItemSum(_key, _dateFrom, _dateTo, 6);
-            DebtPayItem = _safeServ.GetItemSum(_key, _dateFrom, _dateTo, 7);
-            DebtCatchItem = _safeServ.GetItemSum(_key, _dateFrom, _dateTo, 8);
-            PremiumPayItem = _safeServ.GetItemSum(_key, _dateFrom, _dateTo, 9);
+            SafeItem = safes.Where(w => w.Source == 1 && w.Statement.Contains(_key)).Sum(s => s.Amount);
+            SpendingItem = safes.Where(w => w.Source == 2 && w.Statement.Contains(_key)).Sum(s => s.Amount);
+            SupplyItem = safes.Where(w => w.Source == 3 && w.Statement.Contains(_key)).Sum(s => s.Amount);
+            SaleItem = safes.Where(w => w.Source == 4 && w.Statement.Contains(_key)).Sum(s => s.Amount);
+            AccountPayItem = safes.Where(w => w.Source == 5 && w.Statement.Contains(_key)).Sum(s => s.Amount);
+            AccountCatchItem = safes.Where(w => w.Source == 6 && w.Statement.Contains(_key)).Sum(s => s.Amount);
+            DebtPayItem = safes.Where(w => w.Source == 7 && w.Statement.Contains(_key)).Sum(s => s.Amount);
+            DebtCatchItem = safes.Where(w => w.Source == 8 && w.Statement.Contains(_key)).Sum(s => s.Amount);
+            PremiumPayItem = safes.Where(w => w.Source == 9 && w.Statement.Contains(_key)).Sum(s => s.Amount);
             _safeDetailsDialog.DataContext = this;
             await _currentWindow.ShowMetroDialogAsync(_safeDetailsDialog);
         }
@@ -315,7 +335,6 @@ namespace Sales.ViewModels.SafeViewModels
             {
                 case "Details":
                     await _currentWindow.HideMetroDialogAsync(_safeDetailsDialog);
-                    Load();
                     break;
                 default:
                     break;
@@ -323,5 +342,9 @@ namespace Sales.ViewModels.SafeViewModels
 
         }
 
+        private void GetCurrentPage()
+        {
+            Safes = new ObservableCollection<Safe>(safes.Where(w => w.Statement.Contains(_key)).OrderByDescending(o => o.RegistrationDate).Skip((_currentPage - 1) * 17).Take(17));
+        }
     }
 }

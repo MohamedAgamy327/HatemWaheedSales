@@ -1,4 +1,5 @@
 ﻿using Sales.Models;
+using Sales.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,19 +41,11 @@ namespace Sales.Services
             }
         }
 
-        public int GetSafesNumer(string key)
+        public Safe GetLastSafe()
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Safes.Where(w => w.Statement.Contains(key)).Count();
-            }
-        }
-
-        public int GetSafesNumer(string key, DateTime dtFrom, DateTime dtTo)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Safes.Where(w => w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Count();
+                return db.Safes.OrderByDescending(o => o.RegistrationDate).FirstOrDefault();
             }
         }
 
@@ -64,30 +57,6 @@ namespace Sales.Services
             }
         }
 
-        public decimal? GetTotalIncome(string key, DateTime dtFrom, DateTime dtTo)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Safes.Where(w => w.Amount > 0 && w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Sum(s => s.Amount);
-            }
-        }
-
-        public decimal? GetTotalOutgoings(string key, DateTime dtFrom, DateTime dtTo)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Safes.Where(w => w.Amount < 0 && w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Sum(s => s.Amount);
-            }
-        }
-
-        public decimal? GetItemSum(string key, DateTime dtFrom, DateTime dtTo, int source)
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Safes.Where(w => w.Source == source && w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Sum(s => s.Amount);
-            }
-        }
-
         public List<string> GetStatementSuggetions()
         {
             using (SalesDB db = new SalesDB())
@@ -96,20 +65,31 @@ namespace Sales.Services
             }
         }
 
-        public List<Safe> SearchSafes(string search, int page)
+        public List<Safe> GetSafes()
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Safes.Where(w => (w.Statement).Contains(search)).OrderByDescending(o => o.RegistrationDate).Skip((page - 1) * 17).Take(17).ToList();
+                return db.Safes.Where(w => w.RegistrationDate.Year == MainViewModel.Year).OrderByDescending(o => o.RegistrationDate).ToList();
             }
         }
 
-        public List<Safe> SearchSafes(string search, int page, DateTime dtFrom, DateTime dtTo)
+        public List<Safe> GetSafes(DateTime dtFrom, DateTime dtTo)
         {
             using (SalesDB db = new SalesDB())
             {
-                return db.Safes.Where(w => (w.Statement).Contains(search) && w.Date >= dtFrom && w.Date <= dtTo).OrderByDescending(o => o.RegistrationDate).Skip((page - 1) * 17).Take(17).ToList();
+                return db.Safes.Where(w =>  w.Date >= dtFrom && w.Date <= dtTo).OrderByDescending(o => o.RegistrationDate).ToList();
             }
         }
+
+
+        //public decimal? GetItemSum(string key, DateTime dtFrom, DateTime dtTo, int source)
+        //{
+        //    using (SalesDB db = new SalesDB())
+        //    {
+        //        return db.Safes.Where(w => w.Source == source && w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Sum(s => s.Amount);
+        //    }
+        //}
+
+
     }
 }

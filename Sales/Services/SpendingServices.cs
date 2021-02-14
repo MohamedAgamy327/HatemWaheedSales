@@ -2,7 +2,6 @@
 using Sales.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 
 namespace Sales.Services
@@ -29,6 +28,14 @@ namespace Sales.Services
             }
         }
 
+        public Spending GetLastSpending()
+        {
+            using (SalesDB db = new SalesDB())
+            {
+                return db.Spendings.OrderByDescending(o => o.RegistrationDate).FirstOrDefault();
+            }
+        }
+
         public List<string> GetStatementSuggetions()
         {
             using (SalesDB db = new SalesDB())
@@ -48,14 +55,6 @@ namespace Sales.Services
             using (SalesDB db = new SalesDB())
             {
                 return db.Spendings.AsNoTracking().Where(c => c.RegistrationDate.Year == MainViewModel.Year).OrderByDescending(o => o.RegistrationDate).ToList();
-            }
-        }
-
-        public Spending GetLastSpending()
-        {
-            using (SalesDB db = new SalesDB())
-            {
-                return db.Spendings.OrderByDescending(o=>o.RegistrationDate).FirstOrDefault();
             }
         }
 

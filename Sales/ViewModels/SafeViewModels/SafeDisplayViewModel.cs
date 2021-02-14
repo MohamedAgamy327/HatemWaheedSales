@@ -18,21 +18,23 @@ namespace Sales.ViewModels.SafeViewModels
         MetroWindow _currentWindow;
         private readonly SafeAddDialog _safeAddDialog;
 
+        List<Safe> safes;
+
         SafeServices _safeServ;
 
         private void Load()
         {
             CurrentPage = 1;
             ISFirst = false;
-            TotalRecords = _safeServ.GetSafesNumer(Key);
-            LastPage = (int)Math.Ceiling(Convert.ToDecimal((double)_safeServ.GetSafesNumer(_key) / 17));
+            TotalRecords = safes.Where(w => w.Statement.Contains(_key)).Count();
+            LastPage = (int)Math.Ceiling(Convert.ToDecimal(TotalRecords / 17));
             if (_lastPage == 0)
                 LastPage = 1;
             if (_lastPage == 1)
                 ISLast = false;
             else
                 ISLast = true;
-            Safes = new ObservableCollection<Safe>(_safeServ.SearchSafes(_key, _currentPage));
+            GetCurrentPage();
         }
 
         public SafeDisplayViewModel()
@@ -42,8 +44,9 @@ namespace Sales.ViewModels.SafeViewModels
 
             _key = "";
             _isFocused = true;
-            _statementSuggestions = _safeServ.GetStatementSuggetions();
             _currentWindow = Application.Current.Windows.OfType<MetroWindow>().LastOrDefault();
+            _statementSuggestions = _safeServ.GetStatementSuggetions();      
+            safes = _safeServ.GetSafes();
             Load();
         }
 
@@ -158,7 +161,7 @@ namespace Sales.ViewModels.SafeViewModels
             ISFirst = true;
             if (_currentPage == _lastPage)
                 ISLast = false;
-            Safes = new ObservableCollection<Safe>(_safeServ.SearchSafes(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _previous;
@@ -176,7 +179,7 @@ namespace Sales.ViewModels.SafeViewModels
             ISLast = true;
             if (_currentPage == 1)
                 ISFirst = false;
-            Safes = new ObservableCollection<Safe>(_safeServ.SearchSafes(_key, _currentPage));
+            GetCurrentPage();
         }
 
         private RelayCommand _delete;
@@ -200,6 +203,7 @@ namespace Sales.ViewModels.SafeViewModels
             if (result == MessageDialogResult.Affirmative)
             {
                 _safeServ.DeleteSafe(_selectedSafe);
+                safes.Remove(_selectedSafe);
                 Load();
             }
         }
@@ -241,6 +245,7 @@ namespace Sales.ViewModels.SafeViewModels
             _newSafe.CanDelete = true;
             _newSafe.Source = 1;
             _safeServ.AddSafe(_newSafe);
+            safes.Add(_safeServ.GetLastSafe());
             _statementSuggestions.Add(_newSafe.Statement);
             NewSafe = new Safe();
             NewSafe.Date = DateTime.Now;
@@ -278,5 +283,11 @@ namespace Sales.ViewModels.SafeViewModels
             }
 
         }
+
+        private void GetCurrentPage()
+        {
+            Safes = new ObservableCollection<Safe>(safes.Where(w => w.Statement.Contains(_key)).OrderByDescending(o => o.RegistrationDate).Skip((_currentPage - 1) * 17).Take(17));
+        }
+
     }
 }

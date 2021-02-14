@@ -67,7 +67,7 @@
                 <DatePicker SelectedDate="{Binding DateFrom,UpdateSourceTrigger=PropertyChanged}"    Margin="5,0" Style="{StaticResource DatePickerStyle}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectedDateChanged">
-                            <Custom:EventToCommand Command="{Binding Search}" />
+                            <Custom:EventToCommand Command="{Binding SearchByDate}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </DatePicker>
@@ -75,7 +75,7 @@
                 <DatePicker     SelectedDate="{Binding DateTo,UpdateSourceTrigger=PropertyChanged}" Margin="5,0" Style="{StaticResource DatePickerStyle}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectedDateChanged">
-                            <Custom:EventToCommand Command="{Binding Search}" />
+                            <Custom:EventToCommand Command="{Binding SearchByDate}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </DatePicker>
