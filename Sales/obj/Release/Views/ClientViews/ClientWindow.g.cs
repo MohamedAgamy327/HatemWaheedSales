@@ -10,6 +10,7 @@
 //------------------------------------------------------------------------------
 
 using MahApps.Metro.Controls;
+using RootLibrary.WPF.Localization;
 using Sales.ViewModels.ClientViewModels;
 using Sales.Views.ClientViews;
 using System;

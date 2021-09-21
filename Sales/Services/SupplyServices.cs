@@ -34,7 +34,6 @@ namespace Sales.Services
             }
         }
 
-
         public void AddSupply(Supply supply)
         {
             using (SalesDB db = new SalesDB())
@@ -102,23 +101,6 @@ namespace Sales.Services
                 return db.Supplies.Include(i => i.Client).Where(w => (w.ID.ToString() + w.Client.Name).Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).OrderByDescending(o => o.RegistrationDate).Skip((page - 1) * 17).Take(17).ToList();
             }
         }
-
-        //public List<Supply> SearchSupplies(string key, int page)
-        //{
-        //    using (SalesDB db = new SalesDB())
-        //    {
-        //        return db.Supplies.Include(i => i.Client).Where(w => (w.ID.ToString() + w.Client.Name).Contains(key)).OrderByDescending(o => o.RegistrationDate).Skip((page - 1) * 17).Take(17).Include(i => i.SupplyRecalls).ToList();
-        //    }
-        //}
-
-
-        //public int GetSuppliesNumer(string key)
-        //{
-        //    using (SalesDB db = new SalesDB())
-        //    {
-        //        return db.Supplies.Include(i => i.Client).Where(w => (w.ID.ToString() + w.Client.Name).Contains(key)).Count();
-        //    }
-        //}
 
     }
 }

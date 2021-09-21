@@ -9,6 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using RootLibrary.WPF.Localization;
 using Sales.ViewModels;
 using System;
 using System.Diagnostics;

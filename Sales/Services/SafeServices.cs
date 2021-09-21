@@ -82,14 +82,5 @@ namespace Sales.Services
         }
 
 
-        //public decimal? GetItemSum(string key, DateTime dtFrom, DateTime dtTo, int source)
-        //{
-        //    using (SalesDB db = new SalesDB())
-        //    {
-        //        return db.Safes.Where(w => w.Source == source && w.Statement.Contains(key) && w.Date >= dtFrom && w.Date <= dtTo).Sum(s => s.Amount);
-        //    }
-        //}
-
-
     }
 }

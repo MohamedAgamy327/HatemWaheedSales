@@ -222,7 +222,6 @@ namespace Sales.Services
             }
         }
 
-
         public int GetAllCategoriesNumer(string key)
         {
             using (SalesDB db = new SalesDB())

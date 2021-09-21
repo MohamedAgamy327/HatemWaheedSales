@@ -10,7 +10,7 @@
 //------------------------------------------------------------------------------
 
 using MahApps.Metro.Controls;
-using SAPBusinessObjects.WPF.Viewer;
+using RootLibrary.WPF.Localization;
 using Sales.SplashScreen;
 using System;
 using System.Diagnostics;

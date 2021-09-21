@@ -13,6 +13,7 @@ using GalaSoft.MvvmLight.Command;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using MahApps.Metro.IconPacks;
+using RootLibrary.WPF.Localization;
 using Sales.Helpers;
 using System;
 using System.Diagnostics;

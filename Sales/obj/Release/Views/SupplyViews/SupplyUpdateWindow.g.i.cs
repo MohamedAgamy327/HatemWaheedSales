@@ -11,6 +11,7 @@
 
 using MahApps.Metro.Controls;
 using MahApps.Metro.IconPacks;
+using RootLibrary.WPF.Localization;
 using Sales.Helpers;
 using System;
 using System.Diagnostics;
